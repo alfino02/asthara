@@ -610,52 +610,52 @@ export default function HomePage() {
                   )}
                 </button>
 
-                {/* 1-Click Operational Brand Switcher Pill */}
-                <div className="inline-flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200/80 shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectBrand('nabila')}
-                    className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 ${
-                      selectedBrand === 'nabila'
-                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                {/* Single Active Entity Official Badge (Clean, Separate Brand Identity) */}
+                <div
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border shadow-2xs ${
+                    isNabila
+                      ? 'bg-red-50/90 border-red-200/90 text-red-900'
+                      : 'bg-orange-50/90 border-orange-200/90 text-orange-900'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-md p-0.5 flex items-center justify-center shrink-0 border ${
+                      isNabila
+                        ? 'bg-white border-red-200 shadow-2xs'
+                        : 'bg-white border-orange-200 shadow-2xs'
                     }`}
-                    title="Beralih ke operasional PT Asthara (Nabila Trip)"
                   >
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        selectedBrand === 'nabila' ? 'bg-white' : 'bg-red-500'
-                      }`}
+                    <img
+                      src={activeBrandMeta.logoUrl}
+                      alt={activeBrandMeta.name}
+                      className="w-full h-full object-contain"
                     />
-                    <span>PT ASTHARA</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectBrand('piknik')}
-                    className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 ${
-                      selectedBrand === 'piknik'
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                    title="Beralih ke operasional Piknik Enthusiast"
-                  >
+                  </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-xs font-black uppercase tracking-tight truncate">
+                      {isNabila ? 'PT ASTHARA' : 'Piknik Enthusiast'}
+                    </span>
                     <span
-                      className={`w-2 h-2 rounded-full ${
-                        selectedBrand === 'piknik' ? 'bg-white' : 'bg-orange-500'
+                      className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                        isNabila
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-orange-100 text-orange-700'
                       }`}
-                    />
-                    <span>Piknik Enthusiast</span>
-                  </button>
+                    >
+                      {isNabila ? 'Nabila Trip' : 'Custom Trip'}
+                    </span>
+                  </div>
                 </div>
 
+                {/* Ganti Entitas Button (Buka Layar Pilihan Entitas Terpisah) */}
                 <button
                   type="button"
                   onClick={() => setShowEntityModal(true)}
-                  className="hidden sm:inline-flex h-8 px-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 items-center gap-1.5 transition"
-                  title="Buka Layar Pilihan Entitas Lengkap"
+                  className="inline-flex h-8 px-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                  title="Ganti Entitas / Brand Operasional"
                 >
-                  <ArrowLeftRight className="w-3 h-3 text-slate-500" />
-                  <span>Profil Entitas</span>
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Ganti Entitas</span>
                 </button>
 
                 {/* Quick Navigation Pills when Sidebar is Hidden */}
