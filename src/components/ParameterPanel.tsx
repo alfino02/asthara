@@ -420,7 +420,7 @@ export default function ParameterPanel({
   );
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-md flex flex-col lg:h-[calc(100vh-158px)] overflow-hidden min-w-0">
+    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col h-full xl:h-[calc(100vh-215px)] xl:min-h-[580px] overflow-hidden min-w-0">
       {/* MODERN DARK COMMAND HEADER DECK (Clean, executive-grade design) */}
       <div className="p-4 sm:p-4.5 bg-slate-950 text-white space-y-3 shrink-0 relative overflow-hidden">
         {/* Subtle Brand Radial Accent */}

@@ -16,10 +16,12 @@ import {
 
 interface EntitySelectorScreenProps {
   onSelectBrand: (brand: BrandId) => void;
+  onClose?: () => void;
 }
 
 export default function EntitySelectorScreen({
   onSelectBrand,
+  onClose,
 }: EntitySelectorScreenProps) {
   const brandList: BrandId[] = ['nabila', 'piknik'];
 
@@ -46,10 +48,21 @@ export default function EntitySelectorScreen({
           </div>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-[11px] font-semibold text-emerald-400 shadow-lg backdrop-blur-md">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>SQLite Monolith Engine Active</span>
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-800 text-[11px] font-semibold text-emerald-400 shadow-lg backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>SQLite Monolith Engine Active</span>
+          </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3.5 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white transition cursor-pointer shadow-md"
+            >
+              Kembali ke Kalkulator ✕
+            </button>
+          )}
         </div>
       </header>
 

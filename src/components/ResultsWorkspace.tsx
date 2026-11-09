@@ -22,6 +22,9 @@ import {
   Tag,
   Receipt,
   PackageCheck,
+  FileText,
+  Database,
+  History,
 } from 'lucide-react';
 
 export type WorkspaceTab =
@@ -58,48 +61,48 @@ export function KpiSummaryCards({
   const isNabila = brand === 'nabila';
 
   return (
-    <div className="no-print grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+    <div className="no-print grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
       {/* Card 1: Harga Jual / Pax (Vivid Brand Gradient) */}
       <div
-        className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white shadow-xl transition-all hover:scale-[1.01] flex items-center justify-between gap-3 ${
+        className={`relative overflow-hidden rounded-2xl p-3 sm:p-3.5 text-white shadow-md transition-all hover:scale-[1.01] flex items-center justify-between gap-2.5 ${
           isNabila
-            ? 'bg-gradient-to-br from-red-600 via-rose-600 to-red-800 shadow-red-600/20 border border-red-500/40'
-            : 'bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700 shadow-orange-600/20 border border-orange-500/40'
+            ? 'bg-gradient-to-br from-red-600 via-rose-600 to-red-800 shadow-red-600/15 border border-red-500/40'
+            : 'bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700 shadow-orange-600/15 border border-orange-500/40'
         }`}
       >
         <div className="min-w-0 relative z-10 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse" />
-            <div className="text-[11px] font-black uppercase tracking-wider text-white/85 truncate">
+            <div className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white/90 truncate">
               Harga Jual / Pax
             </div>
           </div>
-          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono tracking-tight mt-1 truncate tabular-nums">
+          <div className="text-base sm:text-lg xl:text-xl font-black font-mono tracking-tight mt-0.5 truncate tabular-nums">
             {formatRupiah(calc.sellingPricePerPax)}
           </div>
-          <div className="text-[11px] font-medium text-white/90 truncate mt-1 flex items-center gap-1.5">
+          <div className="text-[10px] sm:text-[11px] font-medium text-white/90 truncate mt-0.5 flex items-center gap-1">
             <span className="opacity-75">Omzet:</span>
             <b className="font-mono">{formatRupiah(calc.totalRevenue)}</b>
           </div>
         </div>
-        <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xs flex items-center justify-center shrink-0 hidden sm:flex shadow-inner">
-          <Tag className="w-5 h-5 text-white" />
+        <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/25 backdrop-blur-xs flex items-center justify-center shrink-0 hidden sm:flex shadow-inner">
+          <Tag className="w-4 h-4 text-white" />
         </div>
       </div>
 
       {/* Card 2: HPP / Pax */}
-      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.01] hover:border-slate-300 flex items-center justify-between gap-3">
+      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs transition-all hover:scale-[1.01] hover:border-slate-300 flex items-center justify-between gap-2.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-indigo-500" />
-            <div className="text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
+            <div className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
               Modal HPP / Pax
             </div>
           </div>
-          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono text-slate-900 mt-1 truncate tabular-nums">
+          <div className="text-base sm:text-lg xl:text-xl font-black font-mono text-slate-900 mt-0.5 truncate tabular-nums">
             {formatRupiah(calc.hppPerPax)}
           </div>
-          <div className="text-[11px] font-medium text-slate-600 truncate mt-1">
+          <div className="text-[10px] sm:text-[11px] font-medium text-slate-600 truncate mt-0.5">
             {calc.vipPax > 0 ? (
               <span>
                 Beban <b className="text-slate-900 font-mono">{calc.totalPax} pax</b> ({calc.regularPax} Reg + {calc.vipPax} VIP)
@@ -111,56 +114,56 @@ export function KpiSummaryCards({
             )}
           </div>
         </div>
-        <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-100/80 text-indigo-600 flex items-center justify-center shrink-0 hidden sm:flex shadow-2xs">
-          <Calculator className="w-5 h-5" />
+        <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100/80 text-indigo-600 flex items-center justify-center shrink-0 hidden sm:flex shadow-2xs">
+          <Calculator className="w-4 h-4" />
         </div>
       </div>
 
       {/* Card 3: Total HPP Final */}
-      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.01] hover:border-slate-300 flex items-center justify-between gap-3">
+      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs transition-all hover:scale-[1.01] hover:border-slate-300 flex items-center justify-between gap-2.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <div className="text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
+            <div className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
               Total HPP Final
             </div>
           </div>
-          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono text-slate-900 mt-1 truncate tabular-nums">
+          <div className="text-base sm:text-lg xl:text-xl font-black font-mono text-slate-900 mt-0.5 truncate tabular-nums">
             {formatRupiah(calc.finalHpp)}
           </div>
-          <div className="text-[11px] font-medium text-slate-600 truncate mt-1 flex items-center gap-1">
+          <div className="text-[10px] sm:text-[11px] font-medium text-slate-600 truncate mt-0.5 flex items-center gap-1">
             <span>Buffer/Pajak:</span>
-            <b className="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60">
+            <b className="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60 text-[10px]">
               {state.taxPct}%
             </b>
           </div>
         </div>
-        <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-100/80 text-amber-600 flex items-center justify-center shrink-0 hidden sm:flex shadow-2xs">
-          <Wallet className="w-5 h-5" />
+        <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100/80 text-amber-600 flex items-center justify-center shrink-0 hidden sm:flex shadow-2xs">
+          <Wallet className="w-4 h-4" />
         </div>
       </div>
 
       {/* Card 4: Estimasi Laba Kotor (Vivid Emerald Gradient) */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-800 text-white rounded-2xl p-4 sm:p-5 shadow-xl shadow-emerald-600/15 border border-emerald-500/40 transition-all hover:scale-[1.01] flex items-center justify-between gap-3">
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-800 text-white rounded-2xl p-3 sm:p-3.5 shadow-md shadow-emerald-600/15 border border-emerald-500/40 transition-all hover:scale-[1.01] flex items-center justify-between gap-2.5">
         <div className="min-w-0 relative z-10 flex-1">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-            <div className="text-[11px] font-black uppercase tracking-wider text-emerald-100 truncate">
+            <div className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-emerald-100 truncate">
               Estimasi Laba
             </div>
           </div>
-          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono text-white mt-1 truncate tabular-nums">
+          <div className="text-base sm:text-lg xl:text-xl font-black font-mono text-white mt-0.5 truncate tabular-nums">
             {formatRupiah(calc.totalProfit)}
           </div>
-          <div className="text-[11px] font-medium text-emerald-100 truncate mt-1 flex items-center gap-1.5">
+          <div className="text-[10px] sm:text-[11px] font-medium text-emerald-100 truncate mt-0.5 flex items-center gap-1">
             <span className="opacity-80">Gross Profit:</span>
-            <b className="font-mono bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-400/30">
+            <b className="font-mono bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-400/30 text-[10px]">
               {state.enableLaba ? `${state.marginPct}%` : '0%'}
             </b>
           </div>
         </div>
-        <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xs flex items-center justify-center shrink-0 hidden sm:flex shadow-inner">
-          <TrendingUp className="w-5 h-5 text-white" />
+        <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/25 backdrop-blur-xs flex items-center justify-center shrink-0 hidden sm:flex shadow-inner">
+          <TrendingUp className="w-4 h-4 text-white" />
         </div>
       </div>
     </div>
@@ -173,6 +176,7 @@ export default function ResultsWorkspace({
   state,
   calc,
   activeTab,
+  onTabChange,
   onUpdatePriceOverride,
   onResetAllPriceOverrides,
   onSaveMaster,
@@ -255,19 +259,92 @@ export default function ResultsWorkspace({
     return true;
   });
 
-  const isLockedViewportTab =
-    activeTab === 'manifest' ||
-    activeTab === 'rab' ||
-    activeTab === 'proposal' ||
-    activeTab === 'database' ||
-    activeTab === 'history';
+  const workspaceTabs: {
+    id: WorkspaceTab;
+    label: string;
+    icon: React.ReactNode;
+    badge?: string | number;
+  }[] = [
+    {
+      id: 'manifest',
+      label: 'Manifest & Logistik',
+      icon: <PackageCheck className="w-3.5 h-3.5 shrink-0" />,
+    },
+    {
+      id: 'rab',
+      label: 'RAB HPP (Negosiasi)',
+      icon: <Receipt className="w-3.5 h-3.5 shrink-0" />,
+      badge: calc.rabItems.length,
+    },
+    {
+      id: 'proposal',
+      label: 'Proposal PDF',
+      icon: <FileText className="w-3.5 h-3.5 shrink-0" />,
+    },
+    {
+      id: 'database',
+      label: 'Database Master',
+      icon: <Database className="w-3.5 h-3.5 shrink-0" />,
+    },
+    {
+      id: 'history',
+      label: 'Riwayat Arsip',
+      icon: <History className="w-3.5 h-3.5 shrink-0" />,
+      badge: brandQuotations.length,
+    },
+  ];
 
   return (
     <div
-      className={`bg-white border border-slate-200/90 rounded-2xl shadow-md overflow-hidden min-w-0 flex flex-col ${
-        isLockedViewportTab ? 'lg:h-[calc(100vh-158px)] print:h-auto print:overflow-visible' : ''
-      }`}
+      className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden min-w-0 flex flex-col h-full xl:h-[calc(100vh-215px)] xl:min-h-[580px] print:h-auto print:overflow-visible"
     >
+      {/* INTEGRATED WORKSPACE TABS HEADER (Always visible, instant 1-click tab switching!) */}
+      <div className="bg-slate-950 px-3.5 py-2.5 flex items-center justify-between gap-2 border-b border-slate-800/90 shrink-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          {workspaceTabs.map((t) => {
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => onTabChange(t.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 transition-all ${
+                  isActive
+                    ? isNabila
+                      ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md shadow-red-600/25'
+                      : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md shadow-orange-600/25'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent hover:border-slate-800'
+                }`}
+              >
+                {t.icon}
+                <span>{t.label}</span>
+                {t.badge !== undefined && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold ${
+                      isActive ? 'bg-black/30 text-white' : 'bg-slate-800 text-slate-400'
+                    }`}
+                  >
+                    {t.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {activeTab === 'rab' && (
+            <button
+              type="button"
+              onClick={handleExportRabCsv}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-800 shadow-2xs transition"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>CSV / Excel</span>
+            </button>
+          )}
+        </div>
+      </div>
       {/* ================= VIEW 1: MANIFEST & LOGISTIK ================= */}
       {activeTab === 'manifest' && (
         <div className="flex flex-col h-full overflow-hidden">

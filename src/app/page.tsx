@@ -40,7 +40,8 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
-  const [selectedBrand, setSelectedBrand] = useState<BrandId | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<BrandId>('nabila');
+  const [showEntityModal, setShowEntityModal] = useState<boolean>(false);
   const [db, setDb] = useState<MasterDatabase>(INITIAL_MASTER_DB);
   const [state, setState] = useState<CalculatorState>(() =>
     createDefaultCalculatorState(INITIAL_MASTER_DB, 'nabila')
@@ -55,9 +56,13 @@ export default function HomePage() {
 
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Fetch Master Database from SQLite on mount & check optional URL params
+  // Fetch Master Database from SQLite on mount & check optional URL params / localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const savedBrand = localStorage.getItem('asthara_active_brand') as BrandId | null;
+      if (savedBrand === 'nabila' || savedBrand === 'piknik') {
+        setSelectedBrand(savedBrand);
+      }
       const params = new URLSearchParams(window.location.search);
       const bParam = params.get('brand');
       if (bParam === 'nabila' || bParam === 'piknik') {
@@ -91,21 +96,30 @@ export default function HomePage() {
 
   const handleSelectBrand = (newBrand: BrandId) => {
     setSelectedBrand(newBrand);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('asthara_active_brand', newBrand);
+    }
     setState(createDefaultCalculatorState(db, newBrand));
     setActiveTab('manifest');
     setMobileSidebarOpen(false);
+    setShowEntityModal(false);
   };
 
-  const activeBrand: BrandId = selectedBrand || 'nabila';
+  const activeBrand: BrandId = selectedBrand;
 
   // Real-time HPP Calculation memoized for active entity
   const calc = useMemo(() => {
     return calculateTrip(state, db, activeBrand);
   }, [state, db, activeBrand]);
 
-  // IF NO ENTITY IS SELECTED YET -> RENDER DEDICATED FULL-PAGE ENTITY SELECTION SCREEN
-  if (!selectedBrand) {
-    return <EntitySelectorScreen onSelectBrand={handleSelectBrand} />;
+  // If user requests full entity selector modal
+  if (showEntityModal) {
+    return (
+      <EntitySelectorScreen
+        onSelectBrand={handleSelectBrand}
+        onClose={() => setShowEntityModal(false)}
+      />
+    );
   }
 
   const activeBrandMeta = BRANDS[selectedBrand];
@@ -309,7 +323,7 @@ export default function HomePage() {
   const displayParameterPanel = !isWideView || showParameterPanel;
 
   return (
-    <div className="min-h-screen bg-slate-100/90 text-slate-900 flex flex-col lg:flex-row lg:h-screen lg:overflow-hidden print:h-auto print:overflow-visible">
+    <div className="min-h-screen bg-slate-100/90 text-slate-900 flex flex-col lg:flex-row print:h-auto print:overflow-visible">
       {/* Toast Notification */}
       {toastMsg && (
         <div className="fixed top-4 right-4 z-50 bg-slate-950 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-800 flex items-center gap-2.5 text-xs font-bold">
@@ -555,9 +569,9 @@ export default function HomePage() {
 
             <button
               type="button"
-              onClick={() => setSelectedBrand(null)}
+              onClick={() => setShowEntityModal(true)}
               className="px-2.5 py-2 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center gap-1.5 transition"
-              title="Kembali ke pemilihan entitas"
+              title="Buka Layar Pilihan Profil Entitas"
             >
               <ArrowLeftRight className="w-3.5 h-3.5" />
               <span>Entitas</span>
@@ -567,13 +581,13 @@ export default function HomePage() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 min-w-0 pb-24 lg:pb-3 lg:h-screen lg:overflow-hidden print:h-auto print:overflow-visible">
-        <main className="max-w-[1600px] mx-auto px-3 sm:px-5 pt-3 space-y-3 h-full flex flex-col">
+      <div className="flex-1 min-w-0 pb-24 xl:pb-3 xl:h-screen xl:overflow-hidden print:h-auto print:overflow-visible">
+        <main className="max-w-[1680px] mx-auto px-3 sm:px-5 pt-3 space-y-3 h-full flex flex-col">
           {/* MODERN TOP COMMAND BAR + KPI SUMMARY CARDS */}
           <div className="no-print space-y-3 shrink-0">
             <div className="no-print bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
-              {/* Left: Hide/Show Sidebar Toggle + Active View Title */}
-              <div className="flex items-center gap-3 min-w-0">
+              {/* Left: Hide/Show Sidebar Toggle + Brand Switcher + Active View Title */}
+              <div className="flex items-center gap-3 min-w-0 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setDesktopSidebarHidden((prev) => !prev)}
@@ -598,6 +612,54 @@ export default function HomePage() {
                   ) : (
                     <PanelLeftClose className="w-4 h-4" />
                   )}
+                </button>
+
+                {/* 1-Click Operational Brand Switcher Pill */}
+                <div className="inline-flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200/80 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectBrand('nabila')}
+                    className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 ${
+                      selectedBrand === 'nabila'
+                        ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="Beralih ke operasional PT Asthara (Nabila Trip)"
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        selectedBrand === 'nabila' ? 'bg-white' : 'bg-red-500'
+                      }`}
+                    />
+                    <span>PT ASTHARA</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectBrand('piknik')}
+                    className={`px-3 py-1.5 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 ${
+                      selectedBrand === 'piknik'
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                    title="Beralih ke operasional Piknik Enthusiast"
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        selectedBrand === 'piknik' ? 'bg-white' : 'bg-orange-500'
+                      }`}
+                    />
+                    <span>Piknik Enthusiast</span>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowEntityModal(true)}
+                  className="hidden sm:inline-flex h-8 px-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 items-center gap-1.5 transition"
+                  title="Buka Layar Pilihan Entitas Lengkap"
+                >
+                  <ArrowLeftRight className="w-3 h-3 text-slate-500" />
+                  <span>Profil Entitas</span>
                 </button>
 
                 {/* Quick Navigation Pills when Sidebar is Hidden */}
@@ -629,15 +691,6 @@ export default function HomePage() {
                     <h2 className="text-sm font-black text-slate-900 truncate">
                       {sidebarMenuItems.find((i) => i.id === activeTab)?.label}
                     </h2>
-                    <span
-                      className={`hidden sm:inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase ${
-                        isNabila
-                          ? 'bg-red-50 text-red-700 border border-red-200'
-                          : 'bg-orange-50 text-orange-700 border border-orange-200'
-                      }`}
-                    >
-                      {activeBrandMeta.name}
-                    </span>
                   </div>
                 </div>
               </div>
