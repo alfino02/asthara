@@ -296,7 +296,7 @@ export default function ResultsWorkspace({
 
   return (
     <div
-      className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden min-w-0 flex flex-col h-full xl:h-[calc(100vh-215px)] xl:min-h-[580px] print:h-auto print:overflow-visible"
+      className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden min-w-0 flex flex-col min-h-[660px] xl:h-[calc(100vh-210px)] xl:min-h-[640px] xl:max-h-[960px] print:h-auto print:overflow-visible"
     >
       {/* INTEGRATED WORKSPACE TABS HEADER (Always visible, instant 1-click tab switching!) */}
       <div className="bg-slate-950 px-3.5 py-2 flex items-center justify-between gap-2 border-b border-slate-800/90 shrink-0">
@@ -369,7 +369,7 @@ export default function ResultsWorkspace({
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 pb-20 space-y-4">
             <div
               className="overflow-x-auto border border-slate-200/90 rounded-2xl shadow-xs bg-white"
               role="region"

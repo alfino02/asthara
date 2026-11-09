@@ -581,8 +581,8 @@ export default function HomePage() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 min-w-0 pb-24 xl:pb-3 xl:h-screen xl:overflow-hidden print:h-auto print:overflow-visible">
-        <main className="max-w-[1680px] mx-auto px-3 sm:px-5 pt-3 space-y-3 h-full flex flex-col">
+      <div className="flex-1 min-w-0 pb-16 lg:pb-12 print:h-auto print:overflow-visible">
+        <main className="max-w-[1680px] mx-auto px-3 sm:px-6 pt-3 space-y-4">
           {/* MODERN TOP COMMAND BAR + KPI SUMMARY CARDS */}
           <div className="no-print space-y-3 shrink-0">
             <div className="no-print bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
@@ -786,8 +786,8 @@ export default function HomePage() {
         </main>
       </div>
 
-      {/* FLOATING MOBILE BOTTOM SUMMARY BAR */}
-      <div className="no-print lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 text-white backdrop-blur-md border-t border-slate-800 px-3.5 py-2.5 shadow-2xl">
+      {/* FLOATING MOBILE BOTTOM SUMMARY BAR (Only for small mobile screens < 768px) */}
+      <div className="no-print md:hidden fixed bottom-0 left-0 right-0 z-30 bg-slate-950/95 text-white backdrop-blur-md border-t border-slate-800 px-3.5 py-2.5 shadow-2xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-slate-400">

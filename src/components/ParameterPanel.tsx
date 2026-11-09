@@ -420,7 +420,7 @@ export default function ParameterPanel({
   );
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col h-full xl:h-[calc(100vh-215px)] xl:min-h-[580px] overflow-hidden min-w-0">
+    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col min-h-[660px] xl:h-[calc(100vh-210px)] xl:min-h-[640px] xl:max-h-[960px] overflow-hidden min-w-0">
       {/* MODERN DARK COMMAND HEADER DECK (Clean, executive-grade design) */}
       <div className="p-4 sm:p-4.5 bg-slate-950 text-white space-y-3 shrink-0 relative overflow-hidden">
         {/* Subtle Brand Radial Accent */}
@@ -532,16 +532,16 @@ export default function ParameterPanel({
           </div>
         )}
 
-        {/* Row 2: 4-Column Tactile Metric Tiles (Peserta, Durasi, Zona, Margin) */}
-        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {/* Row 2: 2-Column Spacious Ergonomic Metric Tiles (Peserta, Durasi, Zona, Margin) */}
+        <div className="relative z-10 grid grid-cols-2 gap-2.5">
           {/* Pax Input Tile */}
-          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[76px] transition">
-            <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[82px] transition">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 uppercase tracking-wider">
               <span>Peserta</span>
               <button
                 type="button"
                 onClick={() => updateField('isForeigner', !state.isForeigner)}
-                className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold transition ${
+                className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold transition ${
                   state.isForeigner
                     ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
@@ -551,34 +551,36 @@ export default function ParameterPanel({
                 {state.isForeigner ? 'WNA' : 'WNI'}
               </button>
             </div>
-            <div className="flex items-baseline gap-1.5 mt-1">
+            <div className="flex items-baseline gap-2 mt-1">
               <input
                 type="number"
                 min={1}
                 max={500}
                 value={state.pax}
                 onChange={(e) => handlePaxChange(parseInt(e.target.value, 10))}
-                className="w-full font-mono text-base font-black text-white bg-transparent focus:outline-none"
+                className="w-full font-mono text-lg font-black text-white bg-transparent focus:outline-none"
               />
               <span className="text-xs text-slate-400 font-semibold shrink-0">
-                {isVip && vipMode === 'add_to_pax' ? 'Reg' : 'Pax'}
+                {isVip && vipMode === 'add_to_pax' ? 'Reguler' : 'Pax'}
               </span>
             </div>
-            {isVip && (
+            {isVip ? (
               <div
-                className="text-[9px] text-amber-300 font-bold font-mono mt-1 truncate"
+                className="text-[10px] text-amber-300 font-bold font-mono mt-1"
                 title={`Total Beban: ${effectiveTotalPax} Pax (Termasuk ${vipPax} VIP)`}
               >
-                {vipMode === 'add_to_pax'
-                  ? `+${vipPax} VIP (${effectiveTotalPax} Tot)`
-                  : `${vipPax} VIP (${effectiveTotalPax} Tot)`}
+                +{vipPax} VIP • Total {effectiveTotalPax} Pax
+              </div>
+            ) : (
+              <div className="text-[10px] text-slate-500 font-medium">
+                Kapasitas rombongan
               </div>
             )}
           </div>
 
           {/* Durasi Tile */}
-          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[76px] transition">
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[82px] transition">
+            <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
               Durasi Tour
             </label>
             <select
@@ -586,51 +588,51 @@ export default function ParameterPanel({
               onChange={(e) =>
                 handleDurationChange(parseInt(e.target.value, 10))
               }
-              className="w-full text-xs font-bold text-white bg-slate-900 focus:outline-none mt-1 cursor-pointer py-1"
+              className="w-full text-xs font-bold text-white bg-slate-900 border border-slate-800 rounded-lg focus:outline-none focus:border-slate-700 mt-1 cursor-pointer py-1.5 px-2"
             >
               <option value={1}>1 Hari (Full Day)</option>
-              <option value={2}>2H 1M (2D1N)</option>
-              <option value={3}>3H 2M (3D2N)</option>
-              <option value={4}>4H 3M (4D3N)</option>
-              <option value={5}>5H 4M (5D4N)</option>
-              <option value={6}>6H 5M (6D5N)</option>
-              <option value={7}>7H 6M (7D6N)</option>
+              <option value={2}>2 Hari 1 Malam (2D1N)</option>
+              <option value={3}>3 Hari 2 Malam (3D2N)</option>
+              <option value={4}>4 Hari 3 Malam (4D3N)</option>
+              <option value={5}>5 Hari 4 Malam (5D4N)</option>
+              <option value={6}>6 Hari 5 Malam (6D5N)</option>
+              <option value={7}>7 Hari 6 Malam (7D6N)</option>
             </select>
-            <div className="text-[9px] text-slate-500 font-medium">
-              {nights > 0 ? `${nights} Malam Inap` : 'Tanpa Inap'}
+            <div className="text-[10px] text-slate-400 font-medium mt-1">
+              {nights > 0 ? `${nights} Malam Inap Hotel` : 'Tanpa Menginap'}
             </div>
           </div>
 
           {/* Zona Jarak Tile */}
-          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[76px] transition">
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Zona Jarak
+          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[82px] transition">
+            <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+              Zona Operasional
             </label>
             <select
               value={state.distanceZone}
               onChange={(e) =>
                 updateField('distanceZone', e.target.value as DistanceZone)
               }
-              className="w-full text-xs font-bold text-white bg-slate-900 focus:outline-none mt-1 cursor-pointer py-1"
+              className="w-full text-xs font-bold text-white bg-slate-900 border border-slate-800 rounded-lg focus:outline-none focus:border-slate-700 mt-1 cursor-pointer py-1.5 px-2"
             >
               <option value="near">Dalam Kota (&lt;50km)</option>
-              <option value="medium">Luar Kota Dekat</option>
-              <option value="far">Luar Kota Jauh</option>
+              <option value="medium">Luar Kota Dekat (50-150km)</option>
+              <option value="far">Luar Kota Jauh (&gt;150km)</option>
             </select>
-            <div className="text-[9px] text-slate-500 font-medium">
-              BBM & Tarif Armada
+            <div className="text-[10px] text-slate-400 font-medium mt-1">
+              BBM & Standar Tarif Armada
             </div>
           </div>
 
           {/* Margin Laba Quick Control */}
-          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[76px] transition">
-            <div className="flex items-center justify-between text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+          <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-3 flex flex-col justify-between min-h-[82px] transition">
+            <div className="flex items-center justify-between text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
               <span>Margin Laba</span>
               <input
                 type="checkbox"
                 checked={state.enableLaba}
                 onChange={(e) => updateField('enableLaba', e.target.checked)}
-                className="w-3.5 h-3.5 rounded accent-emerald-500 cursor-pointer"
+                className="w-4 h-4 rounded accent-emerald-500 cursor-pointer"
                 title="Aktifkan Margin Laba"
               />
             </div>
@@ -644,18 +646,18 @@ export default function ParameterPanel({
                 onChange={(e) =>
                   updateField('marginPct', parseInt(e.target.value, 10) || 0)
                 }
-                className="w-full font-mono text-base font-black text-emerald-400 bg-transparent focus:outline-none disabled:text-slate-600"
+                className="w-full font-mono text-lg font-black text-emerald-400 bg-transparent focus:outline-none disabled:text-slate-600"
               />
               <span className="text-xs text-emerald-500 font-bold shrink-0">%</span>
             </div>
-            <div className="text-[9px] text-slate-500 font-medium truncate">
-              {state.enableLaba ? 'Laba aktif dihitung' : 'HPP Murni (0%)'}
+            <div className="text-[10px] text-slate-400 font-medium mt-1">
+              {state.enableLaba ? 'Laba kotor aktif dihitung' : 'HPP Murni (0% Laba)'}
             </div>
           </div>
         </div>
 
-        {/* Modern Gradient Segmented Section Tabs */}
-        <div className="relative z-10 grid grid-cols-4 gap-1.5 bg-slate-900/95 p-1.5 rounded-xl border border-slate-800">
+        {/* Modern 2x2 Segmented Section Tabs (Spacious, Zero Ellipses!) */}
+        <div className="relative z-10 grid grid-cols-2 gap-2 bg-slate-900/95 p-2 rounded-xl border border-slate-800">
           {sectionTabs.map((t) => {
             const active = activeSection === t.id;
             return (
@@ -663,22 +665,22 @@ export default function ParameterPanel({
                 key={t.id}
                 type="button"
                 onClick={() => setActiveSection(t.id)}
-                className={`py-2 px-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-w-0 ${
+                className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 min-w-0 ${
                   active
-                    ? `${accentGradient} text-white`
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
+                    ? `${accentGradient} text-white shadow-sm`
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/80'
                 }`}
               >
                 {t.icon}
-                <span className="truncate">{t.label}</span>
+                <span className="whitespace-nowrap">{t.label}</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* INTERNAL SCROLLABLE TAB BODY */}
-      <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 bg-gradient-to-b from-slate-50/50 to-white">
+      {/* INTERNAL SCROLLABLE TAB BODY (With generous bottom padding to prevent taskbar collision) */}
+      <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-4 bg-gradient-to-b from-slate-50/50 to-white">
         {/* ==================== TAB 1: ARMADA & VIP ==================== */}
         {activeSection === 'armada' && (
           <div className="space-y-3.5">
