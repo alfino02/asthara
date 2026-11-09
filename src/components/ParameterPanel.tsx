@@ -565,10 +565,13 @@ export default function ParameterPanel({
               </span>
             </div>
             {isVip && (
-              <div className="text-[9px] text-amber-300 font-bold font-mono mt-1 truncate">
+              <div
+                className="text-[9px] text-amber-300 font-bold font-mono mt-1 truncate"
+                title={`Total Beban: ${effectiveTotalPax} Pax (Termasuk ${vipPax} VIP)`}
+              >
                 {vipMode === 'add_to_pax'
-                  ? `+${vipPax} VIP = ${effectiveTotalPax} Beban`
-                  : `${vipPax} VIP / ${effectiveTotalPax} Beban`}
+                  ? `+${vipPax} VIP (${effectiveTotalPax} Tot)`
+                  : `${vipPax} VIP (${effectiveTotalPax} Tot)`}
               </div>
             )}
           </div>

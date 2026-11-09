@@ -299,8 +299,8 @@ export default function ResultsWorkspace({
       className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden min-w-0 flex flex-col h-full xl:h-[calc(100vh-215px)] xl:min-h-[580px] print:h-auto print:overflow-visible"
     >
       {/* INTEGRATED WORKSPACE TABS HEADER (Always visible, instant 1-click tab switching!) */}
-      <div className="bg-slate-950 px-3.5 py-2.5 flex items-center justify-between gap-2 border-b border-slate-800/90 shrink-0">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+      <div className="bg-slate-950 px-3.5 py-2 flex items-center justify-between gap-2 border-b border-slate-800/90 shrink-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5">
           {workspaceTabs.map((t) => {
             const isActive = activeTab === t.id;
             return (
@@ -333,16 +333,9 @@ export default function ResultsWorkspace({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {activeTab === 'rab' && (
-            <button
-              type="button"
-              onClick={handleExportRabCsv}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-800 shadow-2xs transition"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>CSV / Excel</span>
-            </button>
-          )}
+          <div className="text-[11px] font-mono text-slate-400 hidden md:block">
+            {brand.toUpperCase()} ENGINE
+          </div>
         </div>
       </div>
       {/* ================= VIEW 1: MANIFEST & LOGISTIK ================= */}
