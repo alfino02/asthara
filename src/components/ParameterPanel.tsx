@@ -420,7 +420,7 @@ export default function ParameterPanel({
   );
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col min-h-[660px] xl:h-[calc(100vh-210px)] xl:min-h-[640px] xl:max-h-[960px] overflow-hidden min-w-0">
+    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col min-h-[540px] xl:h-[calc(100dvh-200px)] xl:min-h-[560px] xl:max-h-[960px] overflow-hidden min-w-0">
       {/* MODERN DARK COMMAND HEADER DECK (Clean, executive-grade design) */}
       <div className="p-4 sm:p-4.5 bg-slate-950 text-white space-y-3 shrink-0 relative overflow-hidden">
         {/* Subtle Brand Radial Accent */}
@@ -680,7 +680,7 @@ export default function ParameterPanel({
       </div>
 
       {/* INTERNAL SCROLLABLE TAB BODY (With generous bottom padding to prevent taskbar collision) */}
-      <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-4 bg-gradient-to-b from-slate-50/50 to-white">
+      <div className="flex-1 overflow-y-auto p-4 pb-28 space-y-4 bg-gradient-to-b from-slate-50/50 to-white">
         {/* ==================== TAB 1: ARMADA & VIP ==================== */}
         {activeSection === 'armada' && (
           <div className="space-y-3.5">

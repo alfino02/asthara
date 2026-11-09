@@ -296,7 +296,7 @@ export default function ResultsWorkspace({
 
   return (
     <div
-      className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden min-w-0 flex flex-col min-h-[660px] xl:h-[calc(100vh-210px)] xl:min-h-[640px] xl:max-h-[960px] print:h-auto print:overflow-visible"
+      className="bg-white border border-slate-200/90 rounded-2xl shadow-sm overflow-hidden min-w-0 flex flex-col min-h-[540px] xl:h-[calc(100dvh-200px)] xl:min-h-[560px] xl:max-h-[960px] print:h-auto print:overflow-visible"
     >
       {/* INTEGRATED WORKSPACE TABS HEADER (Always visible, instant 1-click tab switching!) */}
       <div className="bg-slate-950 px-3.5 py-2 flex items-center justify-between gap-2 border-b border-slate-800/90 shrink-0">

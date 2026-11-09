@@ -96,17 +96,17 @@ export default function HomePage() {
     setMobileSidebarOpen(false);
   };
 
-  // IF NO ENTITY IS SELECTED YET -> RENDER FRONT SELECTION SCREEN
-  if (!selectedBrand) {
-    return <EntitySelectorScreen onSelectBrand={handleSelectBrand} />;
-  }
+  const activeBrand: BrandId = selectedBrand || 'nabila';
 
-  const activeBrand: BrandId = selectedBrand;
-
-  // Real-time HPP Calculation memoized for active entity
+  // Real-time HPP Calculation memoized for active entity (Unconditionally called before any early return)
   const calc = useMemo(() => {
     return calculateTrip(state, db, activeBrand);
   }, [state, db, activeBrand]);
+
+  // IF NO ENTITY IS SELECTED YET -> RENDER FRONT SELECTION SCREEN FIRST
+  if (!selectedBrand) {
+    return <EntitySelectorScreen onSelectBrand={handleSelectBrand} />;
+  }
 
   const activeBrandMeta = BRANDS[selectedBrand];
   const isNabila = selectedBrand === 'nabila';
@@ -548,7 +548,7 @@ export default function HomePage() {
 
       {/* MAIN CONTENT AREA */}
       <div
-        className={`flex-1 min-w-0 pb-16 lg:pb-12 transition-all duration-300 ease-in-out print:h-auto print:overflow-visible print:pl-0 ${
+        className={`flex-1 min-w-0 pb-28 lg:pb-20 transition-all duration-300 ease-in-out print:h-auto print:overflow-visible print:pl-0 ${
           desktopSidebarHidden ? 'lg:pl-0' : 'lg:pl-64'
         }`}
       >
