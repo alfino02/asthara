@@ -67,6 +67,7 @@ function initSchemaAndSeed(db: any) {
       wajibGuide INTEGER NOT NULL DEFAULT 0,
       biayaGuideNabila INTEGER NOT NULL DEFAULT 0,
       biayaGuidePiknik INTEGER NOT NULL DEFAULT 0,
+      kapasitasGuide INTEGER NOT NULL DEFAULT 10,
       keterangan TEXT NOT NULL DEFAULT ''
     );
 
@@ -137,6 +138,13 @@ function initSchemaAndSeed(db: any) {
     );
   `);
 
+  // Migration: ensure kapasitasGuide exists in existing sqlite databases
+  try {
+    db.exec('ALTER TABLE destinasi ADD COLUMN kapasitasGuide INTEGER NOT NULL DEFAULT 10');
+  } catch {
+    // Column already exists
+  }
+
   // Check if destinasi is empty -> seed all tables
   const countRow = db.prepare('SELECT COUNT(*) as cnt FROM destinasi').get() as { cnt: number };
   if (!countRow || countRow.cnt === 0) {
@@ -152,8 +160,8 @@ export function seedAllTables(db: any, data: MasterDatabase, includeQuotations =
       INSERT INTO destinasi (
         id, nama, wilayah, htmDomestikNabila, htmDomestikPiknik,
         htmMancanegaraNabila, htmMancanegaraPiknik, wajibGuide,
-        biayaGuideNabila, biayaGuidePiknik, keterangan
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        biayaGuideNabila, biayaGuidePiknik, kapasitasGuide, keterangan
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const d of data.destinasi) {
       insDest.run(
@@ -167,6 +175,7 @@ export function seedAllTables(db: any, data: MasterDatabase, includeQuotations =
         d.wajibGuide ? 1 : 0,
         Number(d.biayaGuideNabila) || 0,
         Number(d.biayaGuidePiknik) || 0,
+        Number(d.kapasitasGuide) || 10,
         d.keterangan || ''
       );
     }
@@ -313,6 +322,7 @@ export function getMasterDatabase(): MasterDatabase {
       wajibGuide: Boolean(r.wajibGuide),
       biayaGuideNabila: Number(r.biayaGuideNabila),
       biayaGuidePiknik: Number(r.biayaGuidePiknik),
+      kapasitasGuide: Number(r.kapasitasGuide) || 10,
       keterangan: String(r.keterangan || ''),
     }));
 

@@ -40,6 +40,7 @@ export async function getSupabaseMasterDatabase(): Promise<MasterDatabase | null
       wajibGuide: Boolean(d.wajib_guide),
       biayaGuideNabila: Number(d.biaya_guide_nabila) || 0,
       biayaGuidePiknik: Number(d.biaya_guide_piknik) || 0,
+      kapasitasGuide: Number(d.kapasitas_guide) || 10,
       keterangan: d.keterangan || '',
     }));
 
@@ -138,6 +139,7 @@ export async function seedSupabaseDatabase(data: MasterDatabase) {
     wajib_guide: d.wajibGuide,
     biaya_guide_nabila: d.biayaGuideNabila,
     biaya_guide_piknik: d.biayaGuidePiknik,
+    kapasitas_guide: Number(d.kapasitasGuide) || 10,
     keterangan: d.keterangan || '',
   }));
   await supabase.from('destinasi').upsert(mappedDest);

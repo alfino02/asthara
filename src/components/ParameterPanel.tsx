@@ -1393,40 +1393,6 @@ export default function ParameterPanel({
         {/* ==================== TAB 2: RUTE DESTINASI & JEEP ==================== */}
         {activeSection === 'rute' && (
           <div className="space-y-3">
-            {/* Guide Ratio & Kapasitas Setting */}
-            <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 flex flex-wrap items-center justify-between gap-2 text-xs shadow-2xs">
-              <div className="flex items-center gap-2">
-                <Compass className={`w-4 h-4 ${accentText}`} />
-                <div>
-                  <span className="font-bold text-slate-800 block text-xs">
-                    Kapasitas Rasio Guide Lokal
-                  </span>
-                  <span className="text-[10px] text-slate-500 block">
-                    Alokasi standar: 1 Guide untuk berapa orang di destinasi wisata wajib guide
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold text-slate-600">1 Guide untuk:</span>
-                <div className="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
-                  <input
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={state.guidePaxRatio || 10}
-                    onChange={(e) =>
-                      updateField('guidePaxRatio', parseInt(e.target.value, 10) || 1)
-                    }
-                    className="w-12 h-7 px-1 text-center font-mono font-bold text-xs focus:outline-none"
-                  />
-                  <span className="px-2 py-1 text-[11px] font-semibold text-slate-500 bg-slate-50 border-l border-slate-200">
-                    Orang
-                  </span>
-                </div>
-              </div>
-            </div>
-
             {/* Day Selector + Search */}
             <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100/90 p-2.5 rounded-xl border border-slate-200/80">
               <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -1543,7 +1509,7 @@ export default function ParameterPanel({
                         {!state.guideDisabledDest[dest.nama] && (
                           <div className="flex items-center gap-1.5">
                             <span className="text-[11px] text-slate-500 font-semibold">
-                              Guide (Rasio 1/{state.guidePaxRatio || 10}p):
+                              Guide (Rasio 1/{dest.kapasitasGuide || 10}p):
                             </span>
                             <input
                               type="number"
@@ -1551,7 +1517,7 @@ export default function ParameterPanel({
                               max={20}
                               value={
                                 state.customGuideCounts[dest.nama] ||
-                                Math.max(1, Math.ceil(state.pax / (state.guidePaxRatio || 10)))
+                                Math.max(1, Math.ceil(state.pax / (dest.kapasitasGuide || 10)))
                               }
                               onChange={(e) =>
                                 updateField('customGuideCounts', {

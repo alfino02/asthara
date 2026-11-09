@@ -13,6 +13,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Parkir Bus Rp 30.000',
     },
     {
@@ -26,6 +27,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Termasuk fasilitator & properti games',
     },
     {
@@ -39,6 +41,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Parkir Bus Rp 25.000',
     },
     {
@@ -52,6 +55,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Wajib Jeep dari Basecamp / Parkir Bus Luas',
     },
     {
@@ -65,6 +69,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Akses bus medium & besar aman',
     },
     {
@@ -78,6 +83,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Jalan menanjak sedang',
     },
     {
@@ -91,6 +97,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Wajib Shuttle Jeep dari Tepus',
     },
     {
@@ -104,6 +111,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Wajib Jeep 4x4 dari Sukapura/Tosari',
     },
     {
@@ -117,6 +125,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Wajib Guide & Masker Gas',
     },
     {
@@ -130,6 +139,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Tiket all-in wahana',
     },
     {
@@ -143,6 +153,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Guide lokal internal Keraton',
     },
     {
@@ -156,6 +167,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: true,
       biayaGuideNabila: 150000,
       biayaGuidePiknik: 150000,
+      kapasitasGuide: 10,
       keterangan: 'Jalan kaki santai, wajib guide konservasi',
     },
     {
@@ -169,6 +181,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: true,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 5,
       keterangan: 'Parkir luas bus pariwisata',
     },
     {
@@ -182,6 +195,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: true,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 5,
       keterangan: 'Rute sore via rest area',
     },
     {
@@ -195,6 +209,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: true,
       biayaGuideNabila: 200000,
       biayaGuidePiknik: 200000,
+      kapasitasGuide: 5,
       keterangan: 'Trekking dasar air terjun & Goa Tetes',
     },
     {
@@ -208,6 +223,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: true,
       biayaGuideNabila: 200000,
       biayaGuidePiknik: 200000,
+      kapasitasGuide: 5,
       keterangan: 'Jalur offroad sungai lahar Semeru',
     },
     {
@@ -221,6 +237,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Termasuk surat sehat & masker respirator',
     },
     {
@@ -234,6 +251,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Savana Bekol & Pantai Bama',
     },
     {
@@ -247,6 +265,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Hutan Trembesi Benculuk',
     },
     {
@@ -260,6 +279,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Snorkeling & Pulau Tabuhan',
     },
     {
@@ -273,6 +293,7 @@ export const INITIAL_MASTER_DB: MasterDatabase = {
       wajibGuide: false,
       biayaGuideNabila: 0,
       biayaGuidePiknik: 0,
+      kapasitasGuide: 10,
       keterangan: 'Kampung Heritage Kayutangan',
     },
   ],

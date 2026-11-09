@@ -603,18 +603,18 @@ export function calculateTrip(
         getDestGuideForBrand(destObj, brand) ||
         getOpsRateForBrand(db.operasional, 'GUIDE_LOKAL', brand, 150000);
       const isGuideDisabled = Boolean(state.guideDisabledDest[destObj.nama]);
-      const guideRatio = Math.max(1, Number(state.guidePaxRatio) || 10);
+      const destGuideCap = Math.max(1, Number(destObj.kapasitasGuide) || Number(state.guidePaxRatio) || 10);
 
       if (state.incGuide && destObj.wajibGuide && !isGuideDisabled && destGuideDefault > 0) {
         const gCount =
-          state.customGuideCounts[destObj.nama] || Math.max(1, Math.ceil(totalPax / guideRatio));
+          state.customGuideCounts[destObj.nama] || Math.max(1, Math.ceil(totalPax / destGuideCap));
         const gKey = `guide_dest_${destObj.id}_D${d}`;
         const { price: effGuide, isOverridden: ovGuide } = resolvePrice(gKey, destGuideDefault);
         rabItems.push({
           key: gKey,
           category: 'Destinasi & Jeep',
           label: `Guide Lokal Wajib: ${destObj.nama}`,
-          subLabel: `Regulasi kawasan wisata (Rasio 1 Guide / ${guideRatio} Pax)`,
+          subLabel: `Regulasi kawasan wisata (Rasio 1 Guide / ${destGuideCap} Pax)`,
           volumeText: `${gCount} Guide`,
           multiplier: gCount,
           unitPrice: effGuide,

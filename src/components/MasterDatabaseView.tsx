@@ -91,6 +91,7 @@ export default function MasterDatabaseView({
             wajibGuide: false,
             biayaGuideNabila: 0,
             biayaGuidePiknik: 0,
+            kapasitasGuide: 10,
             keterangan: '',
           },
         ],
@@ -269,7 +270,7 @@ export default function MasterDatabaseView({
         tabIndex={0}
       >
         {activeTable === 'destinasi' && (
-          <table className="w-full text-left border-collapse text-xs min-w-[680px]">
+          <table className="w-full text-left border-collapse text-xs min-w-[800px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
                 <th className="p-2.5 w-16">ID</th>
@@ -278,6 +279,7 @@ export default function MasterDatabaseView({
                 <th className={`p-2.5 text-right ${priceHeadBg}`}>HTM Domestik (Rp)</th>
                 <th className="p-2.5 text-center">Wajib Guide?</th>
                 <th className="p-2.5 text-right">Biaya Guide (Rp)</th>
+                <th className="p-2.5 text-center whitespace-nowrap">Kapasitas Guide</th>
                 <th className="p-2.5">Keterangan Parkir / Akses</th>
                 <th className="p-2.5 w-10"></th>
               </tr>
@@ -353,6 +355,26 @@ export default function MasterDatabaseView({
                       }}
                       className="w-24 px-2 py-1 text-right font-mono border border-slate-200 rounded"
                     />
+                  </td>
+                  <td className="p-2 text-center">
+                    <div className="inline-flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                      <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">1 :</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={row.kapasitasGuide ?? 10}
+                        onChange={(e) => {
+                          const val = Math.max(1, parseInt(e.target.value, 10) || 10);
+                          const next = [...localDb.destinasi];
+                          next[idx] = { ...row, kapasitasGuide: val };
+                          setLocalDb({ ...localDb, destinasi: next });
+                        }}
+                        className="w-12 px-1 py-0.5 text-center font-mono text-xs font-semibold border border-slate-200 rounded bg-white text-slate-800"
+                        title="Kapasitas kuota: 1 guide untuk berapa orang"
+                      />
+                      <span className="text-[10px] text-slate-500 font-medium">Pax</span>
+                    </div>
                   </td>
                   <td className="p-2">
                     <input

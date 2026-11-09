@@ -13,6 +13,7 @@ export interface DestinasiRow {
   wajibGuide: boolean;
   biayaGuideNabila: number;
   biayaGuidePiknik: number;
+  kapasitasGuide?: number; // Kapasitas rasio kuota: 1 guide untuk berapa pax (misal 5, 10, 15 pax/guide)
   keterangan: string;
 }
 
