@@ -336,9 +336,12 @@ export default function ParameterPanel({
           ...data.config,
         }));
         setAiSummary(data.summary);
+      } else {
+        setAiSummary(`⚠️ ${data.message || 'Gagal memproses brief AI.'}`);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Error run ai planner:', err);
+      setAiSummary(`⚠️ Terjadi kendala: ${err?.message || 'Gagal terhubung ke server.'}`);
     } finally {
       setAiLoading(false);
     }
@@ -516,7 +519,13 @@ export default function ParameterPanel({
               </button>
             </div>
             {aiSummary && (
-              <div className="text-[10px] text-emerald-400 bg-slate-950 px-2.5 py-1.5 rounded border border-slate-800">
+              <div
+                className={`text-[10px] px-2.5 py-1.5 rounded border ${
+                  aiSummary.startsWith('⚠️')
+                    ? 'text-rose-400 bg-rose-950/40 border-rose-800'
+                    : 'text-emerald-400 bg-slate-950 border-slate-800'
+                }`}
+              >
                 {aiSummary}
               </div>
             )}

@@ -11,9 +11,13 @@ import {
 } from '@/types/trip';
 import { INITIAL_MASTER_DB } from './seed-data';
 
-// Ensure data directory exists
-const DATA_DIR = path.join(process.cwd(), 'data');
-const DB_PATH = path.join(DATA_DIR, 'trip_monolith.sqlite');
+// Ensure data directory exists with safe fallback for serverless (Vercel Lambda)
+function getDataDir() {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return path.join('/tmp', 'data');
+  }
+  return path.join(process.cwd(), 'data');
+}
 
 // Use global singleton in dev mode to avoid multiple locks
 const globalForDb = globalThis as unknown as {
@@ -22,23 +26,32 @@ const globalForDb = globalThis as unknown as {
 };
 
 function getSqliteInstance() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (globalForDb.sqliteDb) {
+    return globalForDb.sqliteDb;
   }
 
-  if (!globalForDb.sqliteDb) {
+  try {
+    const dataDir = getDataDir();
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    const dbPath = path.join(dataDir, 'trip_monolith.sqlite');
+
     // Load native node:sqlite
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { DatabaseSync } = require('node:sqlite');
-    globalForDb.sqliteDb = new DatabaseSync(DB_PATH);
-  }
+    globalForDb.sqliteDb = new DatabaseSync(dbPath);
 
-  if (!globalForDb.isInitialized) {
-    initSchemaAndSeed(globalForDb.sqliteDb);
-    globalForDb.isInitialized = true;
-  }
+    if (!globalForDb.isInitialized) {
+      initSchemaAndSeed(globalForDb.sqliteDb);
+      globalForDb.isInitialized = true;
+    }
 
-  return globalForDb.sqliteDb;
+    return globalForDb.sqliteDb;
+  } catch (err) {
+    console.warn('SQLite init failed or read-only environment, fallback to memory DB:', err);
+    return null;
+  }
 }
 
 function initSchemaAndSeed(db: any) {
@@ -282,102 +295,110 @@ export function seedAllTables(db: any, data: MasterDatabase, includeQuotations =
 }
 
 export function getMasterDatabase(): MasterDatabase {
-  const db = getSqliteInstance();
+  try {
+    const db = getSqliteInstance();
+    if (!db) {
+      return INITIAL_MASTER_DB;
+    }
 
-  const destRows = db.prepare('SELECT * FROM destinasi ORDER BY id ASC').all() as any[];
-  const destinasi: DestinasiRow[] = destRows.map((r) => ({
-    id: String(r.id),
-    nama: String(r.nama),
-    wilayah: String(r.wilayah),
-    htmDomestikNabila: Number(r.htmDomestikNabila),
-    htmDomestikPiknik: Number(r.htmDomestikPiknik),
-    htmMancanegaraNabila: Number(r.htmMancanegaraNabila),
-    htmMancanegaraPiknik: Number(r.htmMancanegaraPiknik),
-    wajibGuide: Boolean(r.wajibGuide),
-    biayaGuideNabila: Number(r.biayaGuideNabila),
-    biayaGuidePiknik: Number(r.biayaGuidePiknik),
-    keterangan: String(r.keterangan || ''),
-  }));
+    const destRows = db.prepare('SELECT * FROM destinasi ORDER BY id ASC').all() as any[];
+    const destinasi: DestinasiRow[] = destRows.map((r) => ({
+      id: String(r.id),
+      nama: String(r.nama),
+      wilayah: String(r.wilayah),
+      htmDomestikNabila: Number(r.htmDomestikNabila),
+      htmDomestikPiknik: Number(r.htmDomestikPiknik),
+      htmMancanegaraNabila: Number(r.htmMancanegaraNabila),
+      htmMancanegaraPiknik: Number(r.htmMancanegaraPiknik),
+      wajibGuide: Boolean(r.wajibGuide),
+      biayaGuideNabila: Number(r.biayaGuideNabila),
+      biayaGuidePiknik: Number(r.biayaGuidePiknik),
+      keterangan: String(r.keterangan || ''),
+    }));
 
-  const armadaRows = db.prepare('SELECT * FROM armada ORDER BY kapasitas ASC').all() as any[];
-  const armada: ArmadaRow[] = armadaRows.map((r) => ({
-    id: String(r.id),
-    nama: String(r.nama),
-    minPax: Number(r.minPax),
-    maxPax: Number(r.maxPax),
-    kapasitas: Number(r.kapasitas),
-    tarifNearNabila: Number(r.tarifNearNabila),
-    tarifMediumNabila: Number(r.tarifMediumNabila),
-    tarifFarNabila: Number(r.tarifFarNabila),
-    tarifNearPiknik: Number(r.tarifNearPiknik),
-    tarifMediumPiknik: Number(r.tarifMediumPiknik),
-    tarifFarPiknik: Number(r.tarifFarPiknik),
-    keterangan: String(r.keterangan || ''),
-  }));
+    const armadaRows = db.prepare('SELECT * FROM armada ORDER BY kapasitas ASC').all() as any[];
+    const armada: ArmadaRow[] = armadaRows.map((r) => ({
+      id: String(r.id),
+      nama: String(r.nama),
+      minPax: Number(r.minPax),
+      maxPax: Number(r.maxPax),
+      kapasitas: Number(r.kapasitas),
+      tarifNearNabila: Number(r.tarifNearNabila),
+      tarifMediumNabila: Number(r.tarifMediumNabila),
+      tarifFarNabila: Number(r.tarifFarNabila),
+      tarifNearPiknik: Number(r.tarifNearPiknik),
+      tarifMediumPiknik: Number(r.tarifMediumPiknik),
+      tarifFarPiknik: Number(r.tarifFarPiknik),
+      keterangan: String(r.keterangan || ''),
+    }));
 
-  const hotelRows = db.prepare('SELECT * FROM hotel ORDER BY rateNabila ASC').all() as any[];
-  const hotel: HotelRow[] = hotelRows.map((r) => ({
-    id: String(r.id),
-    nama: String(r.nama),
-    wilayah: String(r.wilayah),
-    klasifikasi: String(r.klasifikasi),
-    rateNabila: Number(r.rateNabila),
-    ratePiknik: Number(r.ratePiknik),
-    formatKamar: String(r.formatKamar),
-    kapasitas: Number(r.kapasitas),
-    includeSarapan: String(r.includeSarapan),
-  }));
+    const hotelRows = db.prepare('SELECT * FROM hotel ORDER BY rateNabila ASC').all() as any[];
+    const hotel: HotelRow[] = hotelRows.map((r) => ({
+      id: String(r.id),
+      nama: String(r.nama),
+      wilayah: String(r.wilayah),
+      klasifikasi: String(r.klasifikasi),
+      rateNabila: Number(r.rateNabila),
+      ratePiknik: Number(r.ratePiknik),
+      formatKamar: String(r.formatKamar),
+      kapasitas: Number(r.kapasitas),
+      includeSarapan: String(r.includeSarapan),
+    }));
 
-  const jeepRows = db.prepare('SELECT * FROM jeep ORDER BY id ASC').all() as any[];
-  const jeep: JeepRow[] = jeepRows.map((r) => ({
-    id: String(r.id),
-    lokasiBasecamp: String(r.lokasiBasecamp),
-    jenisRute: String(r.jenisRute),
-    tarifNabila: Number(r.tarifNabila),
-    tarifPiknik: Number(r.tarifPiknik),
-    kapasitas: Number(r.kapasitas),
-    destinasiDilewati: String(r.destinasiDilewati || ''),
-    durasiTrip: String(r.durasiTrip || ''),
-  }));
+    const jeepRows = db.prepare('SELECT * FROM jeep ORDER BY id ASC').all() as any[];
+    const jeep: JeepRow[] = jeepRows.map((r) => ({
+      id: String(r.id),
+      lokasiBasecamp: String(r.lokasiBasecamp),
+      jenisRute: String(r.jenisRute),
+      tarifNabila: Number(r.tarifNabila),
+      tarifPiknik: Number(r.tarifPiknik),
+      kapasitas: Number(r.kapasitas),
+      destinasiDilewati: String(r.destinasiDilewati || ''),
+      durasiTrip: String(r.durasiTrip || ''),
+    }));
 
-  const opsRows = db.prepare('SELECT * FROM operasional ORDER BY kode ASC').all() as any[];
-  const operasional: OperasionalRow[] = opsRows.map((r) => ({
-    kode: String(r.kode),
-    nama: String(r.nama),
-    kategori: String(r.kategori),
-    satuan: String(r.satuan),
-    biayaNabila: Number(r.biayaNabila),
-    biayaPiknik: Number(r.biayaPiknik),
-    rasio: String(r.rasio || ''),
-  }));
+    const opsRows = db.prepare('SELECT * FROM operasional ORDER BY kode ASC').all() as any[];
+    const operasional: OperasionalRow[] = opsRows.map((r) => ({
+      kode: String(r.kode),
+      nama: String(r.nama),
+      kategori: String(r.kategori),
+      satuan: String(r.satuan),
+      biayaNabila: Number(r.biayaNabila),
+      biayaPiknik: Number(r.biayaPiknik),
+      rasio: String(r.rasio || ''),
+    }));
 
-  const quoteRows = db.prepare('SELECT * FROM quotations ORDER BY timestamp DESC').all() as any[];
-  const quotations: QuotationRecord[] = quoteRows.map((r) => ({
-    quoteId: String(r.quoteId),
-    brand: (r.brand === 'piknik' ? 'piknik' : 'nabila'),
-    timestamp: String(r.timestamp),
-    namaKlien: String(r.namaKlien),
-    pax: Number(r.pax),
-    durasi: String(r.durasi),
-    zona: String(r.zona),
-    armada: String(r.armada),
-    jumlahJeep: String(r.jumlahJeep),
-    hppTotal: Number(r.hppTotal),
-    hargaJualPerPax: Number(r.hargaJualPerPax),
-    totalNilai: Number(r.totalNilai),
-    estimasiLaba: Number(r.estimasiLaba),
-    status: String(r.status),
-    payloadJson: String(r.payloadJson || '{}'),
-  }));
+    const quoteRows = db.prepare('SELECT * FROM quotations ORDER BY timestamp DESC').all() as any[];
+    const quotations: QuotationRecord[] = quoteRows.map((r) => ({
+      quoteId: String(r.quoteId),
+      brand: (r.brand === 'piknik' ? 'piknik' : 'nabila'),
+      timestamp: String(r.timestamp),
+      namaKlien: String(r.namaKlien),
+      pax: Number(r.pax),
+      durasi: String(r.durasi),
+      zona: String(r.zona),
+      armada: String(r.armada),
+      jumlahJeep: String(r.jumlahJeep),
+      hppTotal: Number(r.hppTotal),
+      hargaJualPerPax: Number(r.hargaJualPerPax),
+      totalNilai: Number(r.totalNilai),
+      estimasiLaba: Number(r.estimasiLaba),
+      status: String(r.status),
+      payloadJson: String(r.payloadJson || '{}'),
+    }));
 
-  return {
-    destinasi,
-    armada,
-    hotel,
-    jeep,
-    operasional,
-    quotations,
-  };
+    return {
+      destinasi,
+      armada,
+      hotel,
+      jeep,
+      operasional,
+      quotations,
+    };
+  } catch (err) {
+    console.warn('getMasterDatabase error, fallback to INITIAL_MASTER_DB:', err);
+    return INITIAL_MASTER_DB;
+  }
 }
 
 export function updateMasterTables(payload: Partial<MasterDatabase>) {
