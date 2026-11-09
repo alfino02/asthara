@@ -58,88 +58,109 @@ export function KpiSummaryCards({
   const isNabila = brand === 'nabila';
 
   return (
-    <div className="no-print grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="no-print grid grid-cols-2 lg:grid-cols-4 gap-3.5">
       {/* Card 1: Harga Jual / Pax (Vivid Brand Gradient) */}
       <div
-        className={`relative overflow-hidden rounded-2xl px-4 py-3 text-white shadow-lg flex items-center justify-between gap-2 ${
+        className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 text-white shadow-xl transition-all hover:scale-[1.01] flex items-center justify-between gap-3 ${
           isNabila
-            ? 'bg-gradient-to-br from-red-600 via-rose-600 to-red-800 shadow-red-600/20'
-            : 'bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700 shadow-orange-600/20'
+            ? 'bg-gradient-to-br from-red-600 via-rose-600 to-red-800 shadow-red-600/20 border border-red-500/40'
+            : 'bg-gradient-to-br from-orange-500 via-orange-600 to-amber-700 shadow-orange-600/20 border border-orange-500/40'
         }`}
       >
-        <div className="min-w-0 relative z-10">
-          <div className="text-[10px] font-black uppercase tracking-wider text-white/80 truncate">
-            Harga Jual / Pax
+        <div className="min-w-0 relative z-10 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse" />
+            <div className="text-[11px] font-black uppercase tracking-wider text-white/85 truncate">
+              Harga Jual / Pax
+            </div>
           </div>
-          <div className="text-sm sm:text-base xl:text-lg font-black font-mono tracking-tight mt-0.5 truncate">
+          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono tracking-tight mt-1 truncate tabular-nums">
             {formatRupiah(calc.sellingPricePerPax)}
           </div>
-          <div className="text-[10px] font-medium text-white/85 truncate mt-0.5">
-            Omzet: {formatRupiah(calc.totalRevenue)}
+          <div className="text-[11px] font-medium text-white/90 truncate mt-1 flex items-center gap-1.5">
+            <span className="opacity-75">Omzet:</span>
+            <b className="font-mono">{formatRupiah(calc.totalRevenue)}</b>
           </div>
         </div>
-        <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0 hidden sm:flex">
-          <Tag className="w-4 h-4 text-white" />
+        <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xs flex items-center justify-center shrink-0 hidden sm:flex shadow-inner">
+          <Tag className="w-5 h-5 text-white" />
         </div>
       </div>
 
       {/* Card 2: HPP / Pax */}
-      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-blue-600" />
-        <div className="min-w-0">
-          <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">
-            Modal HPP / Pax
+      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.01] hover:border-slate-300 flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-indigo-500" />
+            <div className="text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
+              Modal HPP / Pax
+            </div>
           </div>
-          <div className="text-sm sm:text-base xl:text-lg font-black font-mono text-slate-900 mt-0.5 truncate">
+          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono text-slate-900 mt-1 truncate tabular-nums">
             {formatRupiah(calc.hppPerPax)}
           </div>
-          <div className="text-[10px] font-medium text-slate-500 truncate mt-0.5">
-            {calc.vipPax > 0
-              ? `Beban (${calc.totalPax} pax: ${calc.regularPax} Reg + ${calc.vipPax} VIP)`
-              : `Beban (${calc.totalPax} peserta)`}
+          <div className="text-[11px] font-medium text-slate-600 truncate mt-1">
+            {calc.vipPax > 0 ? (
+              <span>
+                Beban <b className="text-slate-900 font-mono">{calc.totalPax} pax</b> ({calc.regularPax} Reg + {calc.vipPax} VIP)
+              </span>
+            ) : (
+              <span>
+                Beban <b className="text-slate-900 font-mono">{calc.totalPax} peserta</b>
+              </span>
+            )}
           </div>
         </div>
-        <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0 hidden sm:flex">
-          <Calculator className="w-4 h-4" />
+        <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-100/80 text-indigo-600 flex items-center justify-center shrink-0 hidden sm:flex shadow-2xs">
+          <Calculator className="w-5 h-5" />
         </div>
       </div>
 
       {/* Card 3: Total HPP Final */}
-      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between gap-2">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
-        <div className="min-w-0">
-          <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 truncate">
-            Total HPP Final
+      <div className="relative overflow-hidden bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.01] hover:border-slate-300 flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <div className="text-[11px] font-black uppercase tracking-wider text-slate-500 truncate">
+              Total HPP Final
+            </div>
           </div>
-          <div className="text-sm sm:text-base xl:text-lg font-black font-mono text-slate-900 mt-0.5 truncate">
+          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono text-slate-900 mt-1 truncate tabular-nums">
             {formatRupiah(calc.finalHpp)}
           </div>
-          <div className="text-[10px] font-medium text-slate-500 truncate mt-0.5">
-            Termasuk Pajak/Buffer {state.taxPct}%
+          <div className="text-[11px] font-medium text-slate-600 truncate mt-1 flex items-center gap-1">
+            <span>Buffer/Pajak:</span>
+            <b className="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200/60">
+              {state.taxPct}%
+            </b>
           </div>
         </div>
-        <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center shrink-0 hidden sm:flex">
-          <Wallet className="w-4 h-4" />
+        <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-100/80 text-amber-600 flex items-center justify-center shrink-0 hidden sm:flex shadow-2xs">
+          <Wallet className="w-5 h-5" />
         </div>
       </div>
 
       {/* Card 4: Estimasi Laba Kotor (Vivid Emerald Gradient) */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl px-4 py-3 shadow-lg shadow-emerald-600/15 flex items-center justify-between gap-2">
-        <div className="min-w-0 relative z-10">
-          <div className="text-[10px] font-black uppercase tracking-wider text-emerald-100 truncate">
-            Estimasi Laba
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-800 text-white rounded-2xl p-4 sm:p-5 shadow-xl shadow-emerald-600/15 border border-emerald-500/40 transition-all hover:scale-[1.01] flex items-center justify-between gap-3">
+        <div className="min-w-0 relative z-10 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
+            <div className="text-[11px] font-black uppercase tracking-wider text-emerald-100 truncate">
+              Estimasi Laba
+            </div>
           </div>
-          <div className="text-sm sm:text-base xl:text-lg font-black font-mono text-white mt-0.5 truncate">
+          <div className="text-lg sm:text-xl xl:text-2xl font-black font-mono text-white mt-1 truncate tabular-nums">
             {formatRupiah(calc.totalProfit)}
           </div>
-          <div className="text-[10px] font-medium text-emerald-100 truncate mt-0.5">
-            {state.enableLaba
-              ? `Gross Profit (${state.marginPct}%)`
-              : 'Tanpa Margin Laba'}
+          <div className="text-[11px] font-medium text-emerald-100 truncate mt-1 flex items-center gap-1.5">
+            <span className="opacity-80">Gross Profit:</span>
+            <b className="font-mono bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-400/30">
+              {state.enableLaba ? `${state.marginPct}%` : '0%'}
+            </b>
           </div>
         </div>
-        <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0 hidden sm:flex">
-          <TrendingUp className="w-4 h-4 text-white" />
+        <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/25 backdrop-blur-xs flex items-center justify-center shrink-0 hidden sm:flex shadow-inner">
+          <TrendingUp className="w-5 h-5 text-white" />
         </div>
       </div>
     </div>
@@ -251,80 +272,79 @@ export default function ResultsWorkspace({
       {activeTab === 'manifest' && (
         <div className="flex flex-col h-full overflow-hidden">
           {/* Modern Dark Header */}
-          <div className="px-4 py-3 bg-slate-950 text-white flex flex-wrap items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-2.5">
+          <div className="px-5 py-3.5 bg-slate-950 text-white flex flex-wrap items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3">
               <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center text-white ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md ${
                   isNabila
-                    ? 'bg-gradient-to-br from-red-600 to-rose-600'
-                    : 'bg-gradient-to-br from-orange-500 to-amber-600'
+                    ? 'bg-gradient-to-br from-red-600 to-rose-600 shadow-red-600/20'
+                    : 'bg-gradient-to-br from-orange-500 to-amber-600 shadow-orange-600/20'
                 }`}
               >
-                <PackageCheck className="w-4 h-4" />
+                <PackageCheck className="w-4.5 h-4.5" />
               </div>
               <div>
-                <h3 className="text-xs font-black text-white">
+                <h3 className="text-xs sm:text-sm font-black text-white">
                   Manifest Kebutuhan Operasional & Logistik Lapangan
                 </h3>
-                <p className="text-[10px] text-slate-400">
-                  Otomatis dikalkulasi sesuai rasio peserta ({calc.totalPax} Pax)
-                  & durasi ({calc.days} Hari)
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Kalkulasi otomatis rasio peserta ({calc.totalPax} Pax) & durasi ({calc.days} Hari)
                 </p>
               </div>
             </div>
             <span
-              className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${accentBadge}`}
+              className={`px-3 py-1 rounded-full text-[11px] font-bold border shadow-xs ${accentBadge}`}
             >
               Standar {brand.toUpperCase()}
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             <div
-              className="overflow-x-auto border border-slate-200 rounded-xl shadow-2xs"
+              className="overflow-x-auto border border-slate-200/90 rounded-2xl shadow-xs bg-white"
               role="region"
               aria-label="Tabel Manifest Kebutuhan Operasional"
               tabIndex={0}
             >
-              <table className="w-full text-left border-collapse text-xs min-w-[500px]">
-                <thead className="sticky top-0 z-10 bg-slate-100 border-b border-slate-200 text-[10px] font-black text-slate-600 uppercase tracking-wider">
+              <table className="w-full text-left border-collapse text-xs min-w-[560px]">
+                <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wider">
                   <tr>
-                    <th className="py-2.5 px-3">Kebutuhan Operasional</th>
-                    <th className="py-2.5 px-3">Spesifikasi / Alokasi</th>
-                    <th className="py-2.5 px-3 text-center">Satuan</th>
-                    <th className="py-2.5 px-3">Keterangan Lapangan</th>
+                    <th className="py-3 px-4">Kebutuhan Operasional</th>
+                    <th className="py-3 px-4">Spesifikasi / Alokasi</th>
+                    <th className="py-3 px-4 text-center">Satuan</th>
+                    <th className="py-3 px-4">Keterangan Lapangan</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {calc.manifestItems.map((m, idx) => (
                     <tr
                       key={idx}
-                      className={
+                      className={`transition-colors ${
                         m.status === 'nonaktif'
                           ? 'bg-slate-50/50 text-slate-400'
                           : m.status === 'vip'
-                          ? 'bg-amber-50/60 text-slate-900'
-                          : 'bg-white text-slate-800 hover:bg-slate-50/80'
-                      }
+                          ? 'bg-amber-50/50 text-slate-900 font-semibold'
+                          : 'bg-white text-slate-800 hover:bg-slate-50/90'
+                      }`}
                     >
-                      <td className="py-2 px-3 font-bold whitespace-nowrap">
+                      <td className="py-3 px-4 font-bold whitespace-nowrap">
                         {m.kategori}
                       </td>
-                      <td className="py-2 px-3 font-medium">{m.spesifikasi}</td>
-                      <td className="py-2 px-3 text-center whitespace-nowrap">
+                      <td className="py-3 px-4 font-medium">{m.spesifikasi}</td>
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-lg font-mono font-bold text-[10px] whitespace-nowrap ${
+                          className={`inline-block px-3 py-1 rounded-xl font-mono font-bold text-[11px] whitespace-nowrap shadow-2xs ${
                             m.status === 'nonaktif'
                               ? 'bg-slate-100 text-slate-400'
                               : m.status === 'vip'
                               ? 'bg-amber-500 text-white'
-                              : 'bg-slate-900 text-white shadow-2xs'
+                              : 'bg-slate-900 text-white'
                           }`}
                         >
                           {m.jumlahSatuan}
                         </span>
                       </td>
-                      <td className="py-2 px-3 text-slate-500 text-[11px]">
+                      <td className="py-3 px-4 text-slate-500 text-[11px] leading-relaxed">
                         {m.keteranganLapangan}
                       </td>
                     </tr>
@@ -334,7 +354,7 @@ export default function ResultsWorkspace({
             </div>
 
             {/* Ringkasan Jadwal Harian Singkat */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {Array.from({ length: calc.days }, (_, i) => i + 1).map((d) => {
                 const dests = state.selectedDestByDay[d] || [];
                 const armPlan = state.armadaPlanByDay[d];
@@ -349,17 +369,18 @@ export default function ResultsWorkspace({
                 return (
                   <div
                     key={d}
-                    className="p-3 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white space-y-1 text-xs shadow-2xs"
+                    className="p-4 rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 transition shadow-2xs space-y-2 text-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-black text-slate-900">
+                      <span className="font-black text-slate-900 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-slate-900" />
                         Jadwal Hari {d}
                       </span>
-                      <span className="px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono text-[10px] font-bold">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-slate-900 text-white font-mono text-[10px] font-bold shadow-2xs">
                         {armUnits}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-600 truncate pt-0.5">
+                    <div className="text-[11px] text-slate-600 truncate pt-1 border-t border-slate-100">
                       <span className="text-slate-400">Rute Wisata: </span>
                       {dests.length > 0 ? (
                         <span className="font-bold text-slate-800">
@@ -367,7 +388,7 @@ export default function ResultsWorkspace({
                         </span>
                       ) : (
                         <span className="italic text-slate-400">
-                          Belum dipilih
+                          Belum ada destinasi dipilih
                         </span>
                       )}
                     </div>
@@ -383,43 +404,42 @@ export default function ResultsWorkspace({
       {activeTab === 'rab' && (
         <div className="flex flex-col h-full overflow-hidden">
           {/* Pinned Modern Dark Action Bar */}
-          <div className="px-4 py-2.5 bg-slate-950 text-white flex flex-wrap items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-2.5">
+          <div className="px-5 py-3.5 bg-slate-950 text-white flex flex-wrap items-center justify-between gap-3 shrink-0">
+            <div className="flex items-center gap-3">
               <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center text-white ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md ${
                   isNabila
-                    ? 'bg-gradient-to-br from-red-600 to-rose-600'
-                    : 'bg-gradient-to-br from-orange-500 to-amber-600'
+                    ? 'bg-gradient-to-br from-red-600 to-rose-600 shadow-red-600/20'
+                    : 'bg-gradient-to-br from-orange-500 to-amber-600 shadow-orange-600/20'
                 }`}
               >
-                <Receipt className="w-4 h-4" />
+                <Receipt className="w-4.5 h-4.5" />
               </div>
               <div>
-                <h3 className="text-xs font-black text-white">
+                <h3 className="text-xs sm:text-sm font-black text-white">
                   Rincian Anggaran Biaya Pokok (RAB HPP)
                 </h3>
-                <p className="text-[10px] text-slate-400">
-                  Klik kolom harga satuan untuk simulasi negosiasi vendor secara
-                  langsung
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Klik kolom harga satuan untuk simulasi negosiasi vendor secara langsung
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {overrideCount > 0 && (
                 <button
                   type="button"
                   onClick={onResetAllPriceOverrides}
-                  className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex items-center gap-1 transition"
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 flex items-center gap-1.5 transition shadow-2xs"
                 >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Reset ({overrideCount})</span>
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Negosiasi ({overrideCount})</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={handleExportRabCsv}
-                className="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1.5 transition"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1.5 transition shadow-2xs"
               >
                 <Download className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Export CSV / Excel</span>
@@ -434,46 +454,46 @@ export default function ResultsWorkspace({
             aria-label="Tabel Rincian Anggaran Biaya HPP"
             tabIndex={0}
           >
-            <table className="w-full text-left border-collapse text-xs min-w-[540px]">
-              <thead className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 text-[10px] font-black text-slate-600 uppercase tracking-wider">
+            <table className="w-full text-left border-collapse text-xs min-w-[580px]">
+              <thead className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-xs border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wider">
                 <tr>
-                  <th className="py-2 px-3">Item Pengeluaran</th>
-                  <th className="py-2 px-2.5 text-center">Volume</th>
-                  <th className="py-2 px-2.5 text-right">
+                  <th className="py-3 px-4">Item Pengeluaran</th>
+                  <th className="py-3 px-3 text-center">Volume</th>
+                  <th className="py-3 px-3 text-right">
                     Harga Satuan (Editable)
                   </th>
-                  <th className="py-2 px-3 text-right">Subtotal Biaya</th>
+                  <th className="py-3 px-4 text-right">Subtotal Biaya</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800">
                 {calc.rabItems.map((item) => (
                   <tr
                     key={item.key}
-                    className={
+                    className={`transition-colors ${
                       item.highlight === 'vip'
-                        ? 'bg-amber-50/50'
+                        ? 'bg-amber-50/60 font-semibold'
                         : item.highlight === 'gala'
                         ? 'bg-purple-50/40'
-                        : 'hover:bg-slate-50/90 transition-colors'
-                    }
+                        : 'hover:bg-slate-50/90'
+                    }`}
                   >
-                    <td className="py-1.5 px-3">
-                      <div className="font-bold text-slate-900 leading-snug">
+                    <td className="py-3 px-4">
+                      <div className="font-bold text-sm text-slate-900 leading-snug">
                         {item.label}
                       </div>
                       {item.subLabel && (
-                        <div className="text-[10px] text-slate-400 leading-tight">
+                        <div className="text-[11px] text-slate-400 leading-tight mt-0.5">
                           {item.subLabel}
                         </div>
                       )}
                     </td>
-                    <td className="py-1.5 px-2.5 text-center font-mono text-[11px] font-semibold text-slate-600 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/80">
+                    <td className="py-3 px-3 text-center font-mono text-xs font-semibold text-slate-600 whitespace-nowrap">
+                      <span className="px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200/80 font-bold">
                         {item.volumeText}
                       </span>
                     </td>
-                    <td className="py-1.5 px-2.5 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center justify-end gap-1">
+                    <td className="py-3 px-3 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end gap-1.5">
                         {item.isOverridden && (
                           <button
                             type="button"
@@ -483,13 +503,13 @@ export default function ResultsWorkspace({
                             onClick={() =>
                               onUpdatePriceOverride(item.key, null)
                             }
-                            className="text-[9px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 hover:bg-amber-200 font-bold"
+                            className="text-[10px] px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 font-bold transition"
                           >
                             Reset
                           </button>
                         )}
-                        <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white focus-within:border-slate-400 overflow-hidden shadow-2xs">
-                          <span className="px-1.5 text-[10px] font-mono text-slate-400 bg-slate-50 border-r border-slate-200 py-0.5">
+                        <div className="inline-flex items-center rounded-xl border border-slate-200 bg-white hover:border-slate-300 focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-900/10 overflow-hidden shadow-2xs transition">
+                          <span className="px-2 py-1 text-[11px] font-mono font-bold text-slate-400 bg-slate-50 border-r border-slate-200">
                             Rp
                           </span>
                           <input
@@ -503,16 +523,16 @@ export default function ResultsWorkspace({
                                 Number.isNaN(val) ? 0 : val
                               );
                             }}
-                            className={`w-24 px-2 py-0.5 text-right font-mono text-xs font-bold focus:outline-none ${
+                            className={`w-28 px-2.5 py-1 text-right font-mono text-xs font-bold focus:outline-none ${
                               item.isOverridden
-                                ? 'bg-amber-50/70 text-amber-900'
+                                ? 'bg-amber-50/80 text-amber-900'
                                 : 'bg-white text-slate-900'
                             }`}
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="py-1.5 px-3 text-right font-mono font-black text-slate-900 whitespace-nowrap">
+                    <td className="py-3 px-4 text-right font-mono font-black text-sm text-slate-900 whitespace-nowrap tabular-nums">
                       {formatRupiah(item.subtotal)}
                     </td>
                   </tr>
@@ -522,29 +542,29 @@ export default function ResultsWorkspace({
           </div>
 
           {/* Pinned Modern Dark Summary Footer (Always visible without scrolling!) */}
-          <div className="shrink-0 bg-slate-950 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex flex-wrap items-center gap-4 text-[11px]">
+          <div className="shrink-0 bg-slate-950 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-4 text-xs border-t border-slate-800 shadow-xl">
+            <div className="flex flex-wrap items-center gap-5 text-xs">
               <div>
                 <span className="text-slate-400">HPP Pokok: </span>
-                <span className="font-mono font-bold text-white">
+                <span className="font-mono font-bold text-white text-sm tabular-nums">
                   {formatRupiah(calc.totalBaseCost)}
                 </span>
               </div>
-              <div>
+              <div className="flex items-center gap-1.5">
                 <span className="text-amber-400">
-                  Pajak/Buffer ({state.taxPct}%):{' '}
+                  Buffer / Pajak ({state.taxPct}%):{' '}
                 </span>
-                <span className="font-mono font-bold text-amber-300">
+                <span className="font-mono font-bold text-amber-300 text-sm tabular-nums">
                   {formatRupiah(calc.taxOrBufferCost)}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-baseline gap-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-300">
+            <div className="flex items-baseline gap-2.5">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-400">
                 TOTAL HPP FINAL:
               </span>
-              <span className={`text-sm font-black font-mono ${accentText}`}>
+              <span className={`text-base sm:text-lg font-black font-mono tabular-nums ${accentText}`}>
                 {formatRupiah(calc.finalHpp)}
               </span>
             </div>

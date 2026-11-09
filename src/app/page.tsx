@@ -568,16 +568,16 @@ export default function HomePage() {
 
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 min-w-0 pb-24 lg:pb-3 lg:h-screen lg:overflow-hidden print:h-auto print:overflow-visible">
-        <main className="max-w-[1600px] mx-auto px-3 sm:px-5 pt-3 space-y-2.5 h-full flex flex-col">
+        <main className="max-w-[1600px] mx-auto px-3 sm:px-5 pt-3 space-y-3 h-full flex flex-col">
           {/* MODERN TOP COMMAND BAR + KPI SUMMARY CARDS */}
-          <div className="no-print space-y-2.5 shrink-0">
-            <div className="no-print bg-white border border-slate-200/90 rounded-2xl px-3.5 py-2 shadow-xs flex flex-wrap items-center justify-between gap-2">
+          <div className="no-print space-y-3 shrink-0">
+            <div className="no-print bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
               {/* Left: Hide/Show Sidebar Toggle + Active View Title */}
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <button
                   type="button"
                   onClick={() => setDesktopSidebarHidden((prev) => !prev)}
-                  className={`hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition ${
+                  className={`hidden lg:inline-flex items-center gap-2 h-9 px-3 rounded-xl text-xs font-bold border transition ${
                     desktopSidebarHidden
                       ? isNabila
                         ? 'bg-red-600 text-white border-red-600 shadow-sm'
@@ -592,7 +592,7 @@ export default function HomePage() {
                 >
                   {desktopSidebarHidden ? (
                     <>
-                      <PanelLeftOpen className="w-3.5 h-3.5" />
+                      <PanelLeftOpen className="w-4 h-4" />
                       <span>Menu Sidebar</span>
                     </>
                   ) : (
@@ -602,7 +602,7 @@ export default function HomePage() {
 
                 {/* Quick Navigation Pills when Sidebar is Hidden */}
                 {desktopSidebarHidden && (
-                  <div className="hidden xl:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
+                  <div className="hidden xl:flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
                     {sidebarMenuItems.map((item) => {
                       const active = activeTab === item.id;
                       return (
@@ -610,7 +610,7 @@ export default function HomePage() {
                           key={item.id}
                           type="button"
                           onClick={() => selectSidebarTab(item.id)}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1.5 ${
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
                             active
                               ? 'bg-slate-900 text-white shadow-2xs'
                               : 'text-slate-600 hover:text-slate-900'
@@ -625,12 +625,12 @@ export default function HomePage() {
                 )}
 
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <h2 className="text-sm font-black text-slate-900 truncate">
                       {sidebarMenuItems.find((i) => i.id === activeTab)?.label}
                     </h2>
                     <span
-                      className={`hidden sm:inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                      className={`hidden sm:inline-flex px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase ${
                         isNabila
                           ? 'bg-red-50 text-red-700 border border-red-200'
                           : 'bg-orange-50 text-orange-700 border border-orange-200'
@@ -643,9 +643,9 @@ export default function HomePage() {
               </div>
 
               {/* Right: Quick Client Status Pills + Actions */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-100 border border-slate-200/80 text-[11px] font-semibold text-slate-700">
-                  <span className="flex items-center gap-1">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="hidden md:flex items-center gap-2.5 h-9 px-3.5 rounded-xl bg-slate-100/90 border border-slate-200/80 text-xs font-semibold text-slate-700">
+                  <span className="flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-slate-400" />
                     <b>
                       {calc.totalPax} Pax
@@ -653,7 +653,7 @@ export default function HomePage() {
                     </b>
                   </span>
                   <span className="text-slate-300">•</span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
                     <b>
                       {calc.days}H{calc.nights}M
@@ -665,7 +665,7 @@ export default function HomePage() {
                   <button
                     type="button"
                     onClick={() => setShowParameterPanel((prev) => !prev)}
-                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 flex items-center gap-1.5 transition"
+                    className="h-9 px-3.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 flex items-center gap-1.5 transition"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                     <span>
@@ -681,7 +681,7 @@ export default function HomePage() {
                     type="button"
                     disabled={savingQuote}
                     onClick={handleSaveQuotation}
-                    className="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white flex items-center gap-1.5 shadow-sm"
+                    className="h-9 px-3.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white flex items-center gap-1.5 shadow-sm hover:from-emerald-400 hover:to-teal-500 transition"
                   >
                     <Save className="w-3.5 h-3.5" />
                     <span>Simpan HPP</span>
