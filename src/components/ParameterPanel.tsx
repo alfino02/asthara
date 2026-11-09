@@ -24,6 +24,7 @@ import {
   MapPin,
   Compass,
   Hotel,
+  Bed,
   Utensils,
   Camera,
   Plus,
@@ -98,6 +99,19 @@ export default function ParameterPanel({
         ? state.pax
         : Math.max(0, state.pax - vipPax)
       : state.pax;
+
+  const isExtrabed = Boolean(state.incExtrabed);
+  const baseRoomCap = Math.max(1, Number(state.hotelRoomCapacity) || 2);
+  const effectiveRoomCap = isExtrabed ? 3 : baseRoomCap;
+  const regularRoomsCount = Math.max(1, Math.ceil(regularPax / effectiveRoomCap));
+  const defaultExtrabedsNeeded = isExtrabed
+    ? Math.max(0, regularPax - (regularRoomsCount * 2))
+    : 0;
+  const extrabedUnitsCount = isExtrabed
+    ? (state.customExtrabedCount !== undefined && state.customExtrabedCount !== null && state.customExtrabedCount >= 0
+        ? state.customExtrabedCount
+        : defaultExtrabedsNeeded)
+    : 0;
 
   const safeTransportDay = Math.min(activeTransportDay, days);
   const safeDestDay = Math.min(activeDestDay, days);
@@ -1378,7 +1392,41 @@ export default function ParameterPanel({
 
         {/* ==================== TAB 2: RUTE DESTINASI & JEEP ==================== */}
         {activeSection === 'rute' && (
-          <div className="space-y-3.5">
+          <div className="space-y-3">
+            {/* Guide Ratio & Kapasitas Setting */}
+            <div className="p-2.5 rounded-xl bg-white border border-slate-200/90 flex flex-wrap items-center justify-between gap-2 text-xs shadow-2xs">
+              <div className="flex items-center gap-2">
+                <Compass className={`w-4 h-4 ${accentText}`} />
+                <div>
+                  <span className="font-bold text-slate-800 block text-xs">
+                    Kapasitas Rasio Guide Lokal
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">
+                    Alokasi standar: 1 Guide untuk berapa orang di destinasi wisata wajib guide
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-slate-600">1 Guide untuk:</span>
+                <div className="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={state.guidePaxRatio || 10}
+                    onChange={(e) =>
+                      updateField('guidePaxRatio', parseInt(e.target.value, 10) || 1)
+                    }
+                    className="w-12 h-7 px-1 text-center font-mono font-bold text-xs focus:outline-none"
+                  />
+                  <span className="px-2 py-1 text-[11px] font-semibold text-slate-500 bg-slate-50 border-l border-slate-200">
+                    Orang
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Day Selector + Search */}
             <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100/90 p-2.5 rounded-xl border border-slate-200/80">
               <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -1494,14 +1542,16 @@ export default function ParameterPanel({
                         </label>
                         {!state.guideDisabledDest[dest.nama] && (
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] text-slate-500 font-semibold">Guide:</span>
+                            <span className="text-[11px] text-slate-500 font-semibold">
+                              Guide (Rasio 1/{state.guidePaxRatio || 10}p):
+                            </span>
                             <input
                               type="number"
                               min={1}
                               max={20}
                               value={
                                 state.customGuideCounts[dest.nama] ||
-                                Math.max(1, Math.ceil(state.pax / 10))
+                                Math.max(1, Math.ceil(state.pax / (state.guidePaxRatio || 10)))
                               }
                               onChange={(e) =>
                                 updateField('customGuideCounts', {
@@ -1625,13 +1675,127 @@ export default function ParameterPanel({
                 </label>
                 <span className="text-[11px] font-mono font-bold text-slate-500">
                   {nights > 0
-                    ? `${Math.ceil(regularPax / 2)} Kamar Twin`
+                    ? isExtrabed
+                      ? `${regularRoomsCount} Kamar (${extrabedUnitsCount} Extrabed Triple)`
+                      : `${regularRoomsCount} Kamar (${baseRoomCap} Pax/Kmr)`
                     : 'Tour 1 Hari (Tanpa Inap)'}
                 </span>
               </div>
 
               {state.incHotel && nights > 0 && (
-                <div className="space-y-2 bg-slate-100/80 p-3 rounded-xl border border-slate-200">
+                <div className="space-y-2.5 bg-slate-100/80 p-3 rounded-xl border border-slate-200">
+                  {/* KONFIGURASI KAPASITAS KAMAR & EXTRABED */}
+                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-2.5 shadow-2xs">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <Bed className={`w-4 h-4 ${accentText}`} />
+                        <span className="text-xs font-black text-slate-800">
+                          Set Kapasitas Kamar Hotel
+                        </span>
+                      </div>
+
+                      {/* Kapasitas Standar Kamar Selector */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-semibold text-slate-600">
+                          Kapasitas Standar:
+                        </span>
+                        <select
+                          value={state.hotelRoomCapacity || 2}
+                          disabled={isExtrabed}
+                          onChange={(e) =>
+                            updateField(
+                              'hotelRoomCapacity',
+                              parseInt(e.target.value, 10) || 2
+                            )
+                          }
+                          className="h-7 px-2 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-800 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                        >
+                          <option value={1}>1 Orang (Single Room)</option>
+                          <option value={2}>2 Orang (Twin Share — Standar)</option>
+                          <option value={3}>3 Orang (Triple Share)</option>
+                          <option value={4}>4 Orang (Quad Share / Family)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* OPSI EXTRABED (TRIPLE SHARE) */}
+                    <div
+                      className={`p-2.5 rounded-xl border transition-all ${
+                        isExtrabed
+                          ? 'bg-amber-50/90 border-amber-300 text-amber-950 shadow-2xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-700'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <label className="inline-flex items-center gap-2 cursor-pointer font-bold text-xs">
+                          <input
+                            type="checkbox"
+                            checked={isExtrabed}
+                            onChange={(e) =>
+                              updateField('incExtrabed', e.target.checked)
+                            }
+                            className="w-4 h-4 rounded text-amber-600 border-slate-300 focus:ring-amber-500"
+                          />
+                          <span className="flex items-center gap-1.5">
+                            <span>Gunakan Extrabed (Triple Share: 3 Orang / Kamar)</span>
+                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold uppercase tracking-wider">
+                              Kurangi Kamar
+                            </span>
+                          </span>
+                        </label>
+
+                        {isExtrabed && (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-bold text-slate-700">
+                              Biaya Extrabed:
+                            </span>
+                            <div className="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
+                              <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-400 bg-slate-50 border-r border-slate-200">
+                                Rp
+                              </span>
+                              <input
+                                type="number"
+                                step={25000}
+                                value={state.extrabedPrice ?? 250000}
+                                onChange={(e) =>
+                                  updateField(
+                                    'extrabedPrice',
+                                    parseInt(e.target.value, 10) || 0
+                                  )
+                                }
+                                className="w-24 h-7 px-2 text-right font-mono text-xs font-bold focus:outline-none"
+                              />
+                              <span className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 bg-slate-50 border-l border-slate-200">
+                                / pax
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-1.5 text-[11px] leading-relaxed">
+                        {isExtrabed ? (
+                          <div className="space-y-0.5">
+                            <p className="font-semibold text-amber-900">
+                              ✓ Kapasitas menjadi <strong>3 orang per kamar</strong>. Kebutuhan kamar berkurang dari{' '}
+                              <span className="line-through text-slate-500">
+                                {Math.ceil(regularPax / (state.hotelRoomCapacity || 2))} kamar
+                              </span>{' '}
+                              menjadi <strong>{regularRoomsCount} kamar</strong> (hemat {Math.max(0, Math.ceil(regularPax / (state.hotelRoomCapacity || 2)) - regularRoomsCount)} kamar hotel).
+                            </p>
+                            <p className="text-[10px] text-slate-500">
+                              Alokasi riil: {regularRoomsCount} kamar utama + {extrabedUnitsCount} kasur extrabed (@ {formatRupiah(state.extrabedPrice ?? 250000)}/pax) untuk {regularPax} pax reguler.
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-slate-500 text-[10px]">
+                            Centang opsi ini jika peserta menggunakan skema Triple Share. Jumlah kamar yang dipesan otomatis berkurang karena 1 kamar diisi 3 peserta dengan penambahan extrabed.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   {Array.from({ length: nights }, (_, i) => i + 1).map((n) => {
                     const nPlan = state.hotelPlanByNight[n] || {
                       active: true,
@@ -1768,6 +1932,19 @@ export default function ParameterPanel({
 
               {state.incMeal && (
                 <div className="space-y-2 bg-slate-100/80 p-3 rounded-xl border border-slate-200">
+                  {/* Keterangan Harga per 1x Makan Banner */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200/90 text-amber-900 text-[11px] font-semibold">
+                    <div className="flex items-center gap-1.5">
+                      <Utensils className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                      <span>
+                        Keterangan: Nominal diinput adalah <strong>harga per 1x makan</strong>.
+                      </span>
+                    </div>
+                    <span className="font-mono text-[10px] text-amber-800">
+                      Standar: Rp 50.000 / porsi / 1x makan
+                    </span>
+                  </div>
+
                   {Array.from({ length: days }, (_, i) => i + 1).map((d) => {
                     const mPlan = state.mealPlanByDay[d] || {
                       sessions: ['siang', 'malam'],
@@ -1787,42 +1964,62 @@ export default function ParameterPanel({
                     return (
                       <div
                         key={d}
-                        className="px-3.5 py-2.5 bg-white rounded-xl border border-slate-200 flex items-center justify-between gap-3 text-xs shadow-2xs"
+                        className="px-3.5 py-2.5 bg-white rounded-xl border border-slate-200 space-y-1.5 text-xs shadow-2xs"
                       >
-                        <span className="font-bold text-slate-800 w-14">
-                          Hari {d}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          {(['pagi', 'siang', 'malam'] as const).map((sess) => (
-                            <label
-                              key={sess}
-                              className="inline-flex items-center gap-1.5 cursor-pointer capitalize text-xs font-semibold text-slate-700"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={sessions.includes(sess)}
-                                onChange={() => toggleSession(sess)}
-                                className="w-3.5 h-3.5 rounded"
-                              />
-                              <span>{sess}</span>
-                            </label>
-                          ))}
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-bold text-slate-800 w-14 shrink-0">
+                            Hari {d}
+                          </span>
+                          <div className="flex items-center gap-2.5">
+                            {(['pagi', 'siang', 'malam'] as const).map((sess) => (
+                              <label
+                                key={sess}
+                                className="inline-flex items-center gap-1.5 cursor-pointer capitalize text-xs font-semibold text-slate-700"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={sessions.includes(sess)}
+                                  onChange={() => toggleSession(sess)}
+                                  className="w-3.5 h-3.5 rounded"
+                                />
+                                <span>{sess}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <div className="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
+                            <span className="px-1.5 py-1 text-[10px] font-mono font-bold text-slate-400 bg-slate-50 border-r border-slate-200">
+                              Rp
+                            </span>
+                            <input
+                              type="number"
+                              step={5000}
+                              value={mPlan.budget}
+                              onChange={(e) =>
+                                updateField('mealPlanByDay', {
+                                  ...state.mealPlanByDay,
+                                  [d]: {
+                                    ...mPlan,
+                                    budget: parseInt(e.target.value, 10) || 0,
+                                  },
+                                })
+                              }
+                              className="w-20 h-7 px-1.5 font-mono font-bold text-right text-xs focus:outline-none"
+                            />
+                            <span className="px-1.5 py-1 text-[10px] font-bold text-slate-500 bg-slate-50 border-l border-slate-200 whitespace-nowrap">
+                              / 1x makan
+                            </span>
+                          </div>
                         </div>
-                        <input
-                          type="number"
-                          step={5000}
-                          value={mPlan.budget}
-                          onChange={(e) =>
-                            updateField('mealPlanByDay', {
-                              ...state.mealPlanByDay,
-                              [d]: {
-                                ...mPlan,
-                                budget: parseInt(e.target.value, 10) || 0,
-                              },
-                            })
-                          }
-                          className="w-24 h-8 px-2.5 font-mono font-bold text-right text-xs border border-slate-300 rounded-lg bg-white"
-                        />
+
+                        {/* Per-day subtotal breakdown hint */}
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100 font-medium">
+                          <span>
+                            {sessions.length}x makan ({sessions.map((s) => s.toUpperCase()).join(', ') || 'Tanpa sesi'})
+                          </span>
+                          <span className="font-mono">
+                            Estimasi: {sessions.length}x × {regularPax} pax = {sessions.length * regularPax} porsi @ {formatRupiah(mPlan.budget)} / 1x makan
+                          </span>
+                        </div>
                       </div>
                     );
                   })}

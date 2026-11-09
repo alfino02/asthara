@@ -173,7 +173,7 @@ export function createDefaultCalculatorState(
     armadaPlanByDay,
     inputTol: 350000,
 
-    incVip: true,
+    incVip: false,
     vipPaxMode: 'add_to_pax',
     vipPax: 2,
     vipVehName: 'Toyota Alphard Transformer VIP',
@@ -220,6 +220,10 @@ export function createDefaultCalculatorState(
     selectedJeepIds: db.jeep[1] ? [db.jeep[1].id] : db.jeep[0] ? [db.jeep[0].id] : [],
 
     incHotel: true,
+    hotelRoomCapacity: 2,
+    incExtrabed: false,
+    extrabedPrice: 250000,
+    customExtrabedCount: null,
     hotelPlanByNight,
 
     incMeal: true,
@@ -244,6 +248,7 @@ export function createDefaultCalculatorState(
     incDrone: false,
     droneDays: 1,
     incGuide: true,
+    guidePaxRatio: 10,
     incGuideUmum: false,
     guideDisabledDest: {},
     customGuideCounts: {},
@@ -598,16 +603,18 @@ export function calculateTrip(
         getDestGuideForBrand(destObj, brand) ||
         getOpsRateForBrand(db.operasional, 'GUIDE_LOKAL', brand, 150000);
       const isGuideDisabled = Boolean(state.guideDisabledDest[destObj.nama]);
+      const guideRatio = Math.max(1, Number(state.guidePaxRatio) || 10);
+
       if (state.incGuide && destObj.wajibGuide && !isGuideDisabled && destGuideDefault > 0) {
         const gCount =
-          state.customGuideCounts[destObj.nama] || Math.max(1, Math.ceil(totalPax / 10));
+          state.customGuideCounts[destObj.nama] || Math.max(1, Math.ceil(totalPax / guideRatio));
         const gKey = `guide_dest_${destObj.id}_D${d}`;
         const { price: effGuide, isOverridden: ovGuide } = resolvePrice(gKey, destGuideDefault);
         rabItems.push({
           key: gKey,
           category: 'Destinasi & Jeep',
           label: `Guide Lokal Wajib: ${destObj.nama}`,
-          subLabel: `Regulasi kawasan wisata`,
+          subLabel: `Regulasi kawasan wisata (Rasio 1 Guide / ${guideRatio} Pax)`,
           volumeText: `${gCount} Guide`,
           multiplier: gCount,
           unitPrice: effGuide,
@@ -680,8 +687,22 @@ export function calculateTrip(
     status: state.incJeep && totalJeepUnits > 0 ? 'aktif' : 'nonaktif',
   });
 
-  // 6. AKOMODASI HOTEL REGULER (Per Malam)
-  const regularRooms = Math.max(1, Math.ceil(regularPax / 2));
+  // 6. AKOMODASI HOTEL REGULER (Per Malam) & EXTRABED
+  const isExtrabedActive = Boolean(state.incExtrabed);
+  const baseRoomCapacity = Math.max(1, Number(state.hotelRoomCapacity) || 2);
+  const effectiveRoomCapacity = isExtrabedActive ? 3 : baseRoomCapacity;
+  const regularRooms = Math.max(1, Math.ceil(regularPax / effectiveRoomCapacity));
+
+  // Extrabeds needed when triple share is active (pax beyond standard 2 beds per room)
+  const defaultExtrabedsNeeded = isExtrabedActive
+    ? Math.max(0, regularPax - (regularRooms * 2))
+    : 0;
+  const extrabedUnits = isExtrabedActive
+    ? (state.customExtrabedCount !== undefined && state.customExtrabedCount !== null && state.customExtrabedCount >= 0
+        ? state.customExtrabedCount
+        : defaultExtrabedsNeeded)
+    : 0;
+  const defaultExtrabedRate = Number(state.extrabedPrice) || 250000;
   const hotelNamesSummary: string[] = [];
 
   if (state.incHotel && nights > 0 && regularPax > 0) {
@@ -698,11 +719,21 @@ export function calculateTrip(
       const { price: effRate, isOverridden } = resolvePrice(key, defaultRate);
       hotelNamesSummary.push(`Malam ${n}: ${nPlan.hotelNama}`);
 
+      const roomFormatLabel = isExtrabedActive
+        ? 'Triple Share (3 Pax/Kamar) [Extrabed]'
+        : baseRoomCapacity === 1
+        ? 'Single Room (1 Pax/Kamar)'
+        : baseRoomCapacity === 2
+        ? 'Twin Share (2 Pax/Kamar)'
+        : baseRoomCapacity === 3
+        ? 'Triple Share (3 Pax/Kamar)'
+        : `${baseRoomCapacity} Pax/Kamar`;
+
       rabItems.push({
         key,
         category: 'Akomodasi',
         label: `Akomodasi Hotel (Malam ${n}): ${nPlan.hotelNama}`,
-        subLabel: `${nPlan.klasifikasi} — Twin Share (2 Pax/Kamar)`,
+        subLabel: `${nPlan.klasifikasi} — ${roomFormatLabel}`,
         volumeText: `${regularRooms} Kamar × 1 Malam`,
         multiplier: regularRooms,
         unitPrice: effRate,
@@ -710,6 +741,27 @@ export function calculateTrip(
         subtotal: regularRooms * effRate,
         isOverridden,
       });
+
+      // Extrabed line item per malam if extrabed is active and required
+      if (isExtrabedActive && extrabedUnits > 0) {
+        const ebKey = `extrabed_night_${n}`;
+        const { price: effEbRate, isOverridden: isEbOverridden } = resolvePrice(
+          ebKey,
+          defaultExtrabedRate
+        );
+        rabItems.push({
+          key: ebKey,
+          category: 'Akomodasi',
+          label: `Extrabed Hotel (Malam ${n}): ${nPlan.hotelNama}`,
+          subLabel: `Penambahan Kasur Ekstra Triple Share (${extrabedUnits} Bed/Pax)`,
+          volumeText: `${extrabedUnits} Bed × 1 Malam`,
+          multiplier: extrabedUnits,
+          unitPrice: effEbRate,
+          defaultUnitPrice: defaultExtrabedRate,
+          subtotal: extrabedUnits * effEbRate,
+          isOverridden: isEbOverridden,
+        });
+      }
     }
   }
 
@@ -737,13 +789,24 @@ export function calculateTrip(
       ? 'Full Day Tour (Tanpa Menginap)'
       : 'Tanpa Akomodasi Hotel';
 
+  const roomSharingDesc = isExtrabedActive
+    ? `Triple Share (Kapasitas 3 Pax/Kamar: ${regularRooms} Kamar + ${extrabedUnits} Extrabed)`
+    : baseRoomCapacity === 2
+    ? `Twin Share (2 Pax/Kamar: ${regularRooms} Kamar)`
+    : `${baseRoomCapacity} Pax/Kamar: ${regularRooms} Kamar`;
+
   manifestItems.push({
     kategori: 'Akomodasi Hotel',
     spesifikasi: hotelSummaryText,
-    jumlahSatuan: state.incHotel && nights > 0 ? `${regularRooms} Kamar` : '0 Kamar',
+    jumlahSatuan:
+      state.incHotel && nights > 0
+        ? isExtrabedActive && extrabedUnits > 0
+          ? `${regularRooms} Kamar (${extrabedUnits} Extrabed)`
+          : `${regularRooms} Kamar`
+        : '0 Kamar',
     keteranganLapangan:
       state.incHotel && nights > 0
-        ? `Twin Share (${regularPax} pax reguler)`
+        ? `${roomSharingDesc} untuk ${regularPax} pax reguler`
         : 'Tanpa penginapan',
     status: state.incHotel && nights > 0 ? 'aktif' : 'nonaktif',
   });
@@ -822,7 +885,7 @@ export function calculateTrip(
         key,
         category: 'Konsumsi',
         label: `Konsumsi Makan Hari ${d} (${mPlan.sessions.map((s) => s.toUpperCase()).join(', ')})`,
-        subLabel: `${mealConsumers} orang (${totalPax} peserta + ${totalCrewCount} kru) × ${freq}x makan`,
+        subLabel: `${mealConsumers} orang (${totalPax} peserta + ${totalCrewCount} kru) × ${freq}x makan (Harga: ${formatRupiah(effBudget)} / 1x makan)`,
         volumeText: `${dayPortions} Porsi`,
         multiplier: dayPortions,
         unitPrice: effBudget,

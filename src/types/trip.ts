@@ -167,6 +167,10 @@ export interface CalculatorState {
 
   // Hotel Reguler per malam
   incHotel: boolean;
+  hotelRoomCapacity?: number; // default 2 (Twin Share)
+  incExtrabed?: boolean; // checkbox: jika dipilih kapasitas kamar menjadi 3 orang, mengurangi jumlah kamar yang dibutuhkan
+  extrabedPrice?: number; // biaya extrabed per bed/pax per malam (default 250000)
+  customExtrabedCount?: number | null; // null = auto dihitung dari pax & triple share
   hotelPlanByNight: Record<number, HotelNightPlan>;
 
   // Konsumsi & Snack
@@ -196,6 +200,7 @@ export interface CalculatorState {
   droneCount?: number;
   droneDays: number;
   incGuide: boolean;
+  guidePaxRatio?: number; // kapasitas rasio guide: 1 guide untuk berapa orang (default 10)
   incGuideUmum: boolean;
   guideDisabledDest: Record<string, boolean>;
   customGuideCounts: Record<string, number>;
