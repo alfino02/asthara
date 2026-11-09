@@ -593,7 +593,7 @@ export default function HomePage() {
                   }`}
                 >
                   <div
-                    className={`w-4.5 h-4.5 rounded p-0.5 flex items-center justify-center shrink-0 border ${
+                    className={`w-6 h-6 max-w-[24px] max-h-[24px] rounded-md p-0.5 flex items-center justify-center shrink-0 border overflow-hidden ${
                       isNabila
                         ? 'bg-white border-red-200 shadow-2xs'
                         : 'bg-white border-orange-200 shadow-2xs'
@@ -602,7 +602,7 @@ export default function HomePage() {
                     <img
                       src={activeBrandMeta.logoUrl}
                       alt={activeBrandMeta.name}
-                      className="w-full h-full object-contain"
+                      className="max-w-full max-h-full object-contain"
                     />
                   </div>
                   <div className="flex items-center gap-1.5 min-w-0">
