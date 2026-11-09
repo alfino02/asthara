@@ -690,18 +690,20 @@ export function calculateTrip(
   // 6. AKOMODASI HOTEL REGULER (Per Malam) & EXTRABED
   const isExtrabedActive = Boolean(state.incExtrabed);
   const baseRoomCapacity = Math.max(1, Number(state.hotelRoomCapacity) || 2);
-  const effectiveRoomCapacity = isExtrabedActive ? 3 : baseRoomCapacity;
-  const regularRooms = Math.max(1, Math.ceil(regularPax / effectiveRoomCapacity));
-
-  // Extrabeds needed when triple share is active (pax beyond standard 2 beds per room)
+  const defaultTripleRooms = Math.max(1, Math.ceil(regularPax / 3));
   const defaultExtrabedsNeeded = isExtrabedActive
-    ? Math.max(0, regularPax - (regularRooms * 2))
+    ? Math.max(0, regularPax - (defaultTripleRooms * 2))
     : 0;
   const extrabedUnits = isExtrabedActive
     ? (state.customExtrabedCount !== undefined && state.customExtrabedCount !== null && state.customExtrabedCount >= 0
-        ? state.customExtrabedCount
+        ? Number(state.customExtrabedCount)
         : defaultExtrabedsNeeded)
     : 0;
+  
+  // When extrabeds are used, each extrabed accommodates 1 pax, reducing regular bed requirements
+  const regularRooms = isExtrabedActive
+    ? Math.max(1, Math.ceil(Math.max(0, regularPax - extrabedUnits) / baseRoomCapacity))
+    : Math.max(1, Math.ceil(regularPax / baseRoomCapacity));
   const defaultExtrabedRate = Number(state.extrabedPrice) || 250000;
   const hotelNamesSummary: string[] = [];
 

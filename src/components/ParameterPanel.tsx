@@ -102,16 +102,18 @@ export default function ParameterPanel({
 
   const isExtrabed = Boolean(state.incExtrabed);
   const baseRoomCap = Math.max(1, Number(state.hotelRoomCapacity) || 2);
-  const effectiveRoomCap = isExtrabed ? 3 : baseRoomCap;
-  const regularRoomsCount = Math.max(1, Math.ceil(regularPax / effectiveRoomCap));
+  const defaultTripleRooms = Math.max(1, Math.ceil(regularPax / 3));
   const defaultExtrabedsNeeded = isExtrabed
-    ? Math.max(0, regularPax - (regularRoomsCount * 2))
+    ? Math.max(0, regularPax - (defaultTripleRooms * 2))
     : 0;
   const extrabedUnitsCount = isExtrabed
     ? (state.customExtrabedCount !== undefined && state.customExtrabedCount !== null && state.customExtrabedCount >= 0
-        ? state.customExtrabedCount
+        ? Number(state.customExtrabedCount)
         : defaultExtrabedsNeeded)
     : 0;
+  const regularRoomsCount = isExtrabed
+    ? Math.max(1, Math.ceil(Math.max(0, regularPax - extrabedUnitsCount) / baseRoomCap))
+    : Math.max(1, Math.ceil(regularPax / baseRoomCap));
 
   const safeTransportDay = Math.min(activeTransportDay, days);
   const safeDestDay = Math.min(activeDestDay, days);
@@ -1650,115 +1652,34 @@ export default function ParameterPanel({
 
               {state.incHotel && nights > 0 && (
                 <div className="space-y-2.5 bg-slate-100/80 p-3 rounded-xl border border-slate-200">
-                  {/* KONFIGURASI KAPASITAS KAMAR & EXTRABED */}
-                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-2.5 shadow-2xs">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <Bed className={`w-4 h-4 ${accentText}`} />
-                        <span className="text-xs font-black text-slate-800">
-                          Set Kapasitas Kamar Hotel
-                        </span>
-                      </div>
-
-                      {/* Kapasitas Standar Kamar Selector */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-semibold text-slate-600">
-                          Kapasitas Standar:
-                        </span>
-                        <select
-                          value={state.hotelRoomCapacity || 2}
-                          disabled={isExtrabed}
-                          onChange={(e) =>
-                            updateField(
-                              'hotelRoomCapacity',
-                              parseInt(e.target.value, 10) || 2
-                            )
-                          }
-                          className="h-7 px-2 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-800 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
-                        >
-                          <option value={1}>1 Orang (Single Room)</option>
-                          <option value={2}>2 Orang (Twin Share — Standar)</option>
-                          <option value={3}>3 Orang (Triple Share)</option>
-                          <option value={4}>4 Orang (Quad Share / Family)</option>
-                        </select>
-                      </div>
+                  {/* SET KAPASITAS KAMAR HOTEL */}
+                  <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-center gap-1.5">
+                      <Bed className={`w-4 h-4 ${accentText}`} />
+                      <span className="text-xs font-black text-slate-800">
+                        Set Kapasitas Kamar Hotel
+                      </span>
                     </div>
 
-                    {/* OPSI EXTRABED (TRIPLE SHARE) */}
-                    <div
-                      className={`p-2.5 rounded-xl border transition-all ${
-                        isExtrabed
-                          ? 'bg-amber-50/90 border-amber-300 text-amber-950 shadow-2xs'
-                          : 'bg-slate-50 border-slate-200 text-slate-700'
-                      }`}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <label className="inline-flex items-center gap-2 cursor-pointer font-bold text-xs">
-                          <input
-                            type="checkbox"
-                            checked={isExtrabed}
-                            onChange={(e) =>
-                              updateField('incExtrabed', e.target.checked)
-                            }
-                            className="w-4 h-4 rounded text-amber-600 border-slate-300 focus:ring-amber-500"
-                          />
-                          <span className="flex items-center gap-1.5">
-                            <span>Gunakan Extrabed (Triple Share: 3 Orang / Kamar)</span>
-                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold uppercase tracking-wider">
-                              Kurangi Kamar
-                            </span>
-                          </span>
-                        </label>
-
-                        {isExtrabed && (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] font-bold text-slate-700">
-                              Biaya Extrabed:
-                            </span>
-                            <div className="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
-                              <span className="px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-400 bg-slate-50 border-r border-slate-200">
-                                Rp
-                              </span>
-                              <input
-                                type="number"
-                                step={25000}
-                                value={state.extrabedPrice ?? 250000}
-                                onChange={(e) =>
-                                  updateField(
-                                    'extrabedPrice',
-                                    parseInt(e.target.value, 10) || 0
-                                  )
-                                }
-                                className="w-24 h-7 px-2 text-right font-mono text-xs font-bold focus:outline-none"
-                              />
-                              <span className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 bg-slate-50 border-l border-slate-200">
-                                / pax
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="mt-1.5 text-[11px] leading-relaxed">
-                        {isExtrabed ? (
-                          <div className="space-y-0.5">
-                            <p className="font-semibold text-amber-900">
-                              ✓ Kapasitas menjadi <strong>3 orang per kamar</strong>. Kebutuhan kamar berkurang dari{' '}
-                              <span className="line-through text-slate-500">
-                                {Math.ceil(regularPax / (state.hotelRoomCapacity || 2))} kamar
-                              </span>{' '}
-                              menjadi <strong>{regularRoomsCount} kamar</strong> (hemat {Math.max(0, Math.ceil(regularPax / (state.hotelRoomCapacity || 2)) - regularRoomsCount)} kamar hotel).
-                            </p>
-                            <p className="text-[10px] text-slate-500">
-                              Alokasi riil: {regularRoomsCount} kamar utama + {extrabedUnitsCount} kasur extrabed (@ {formatRupiah(state.extrabedPrice ?? 250000)}/pax) untuk {regularPax} pax reguler.
-                            </p>
-                          </div>
-                        ) : (
-                          <p className="text-slate-500 text-[10px]">
-                            Centang opsi ini jika peserta menggunakan skema Triple Share. Jumlah kamar yang dipesan otomatis berkurang karena 1 kamar diisi 3 peserta dengan penambahan extrabed.
-                          </p>
-                        )}
-                      </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-semibold text-slate-600">
+                        Kapasitas Standar:
+                      </span>
+                      <select
+                        value={state.hotelRoomCapacity || 2}
+                        onChange={(e) =>
+                          updateField(
+                            'hotelRoomCapacity',
+                            parseInt(e.target.value, 10) || 2
+                          )
+                        }
+                        className="h-7 px-2 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-800 focus:outline-none"
+                      >
+                        <option value={1}>1 Orang (Single Room)</option>
+                        <option value={2}>2 Orang (Twin Share — Standar)</option>
+                        <option value={3}>3 Orang (Triple Share)</option>
+                        <option value={4}>4 Orang (Quad Share / Family)</option>
+                      </select>
                     </div>
                   </div>
 
@@ -1848,6 +1769,7 @@ export default function ParameterPanel({
                     );
                   })}
 
+                  {/* Tunjangan Kamar Kru / Driver */}
                   <div className="pt-2 flex items-center justify-between text-xs">
                     <label className="inline-flex items-center gap-2 cursor-pointer text-slate-700 font-bold">
                       <input
@@ -1873,6 +1795,98 @@ export default function ParameterPanel({
                         }
                         className="w-28 h-8 px-2.5 font-mono font-bold text-right text-xs border border-slate-300 rounded-lg bg-white"
                       />
+                    )}
+                  </div>
+
+                  {/* SET EXTRABED (Di bawah Tunjangan Kamar Kru) */}
+                  <div className="pt-2.5 border-t border-slate-200/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <label className="inline-flex items-center gap-2 cursor-pointer text-slate-800 font-bold">
+                        <input
+                          type="checkbox"
+                          checked={isExtrabed}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            updateField('incExtrabed', checked);
+                            if (
+                              checked &&
+                              (state.customExtrabedCount === undefined ||
+                                state.customExtrabedCount === null)
+                            ) {
+                              const defRooms = Math.max(1, Math.ceil(regularPax / 3));
+                              const defEb = Math.max(0, regularPax - defRooms * 2);
+                              updateField('customExtrabedCount', defEb);
+                            }
+                          }}
+                          className="w-4 h-4 rounded text-amber-600 border-slate-300 focus:ring-amber-500"
+                        />
+                        <span className="flex items-center gap-1.5">
+                          <span>Gunakan Extrabed</span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold border border-amber-200">
+                            Kurangi Jumlah Kamar
+                          </span>
+                        </span>
+                      </label>
+                    </div>
+
+                    {isExtrabed && (
+                      <div className="p-2.5 bg-white rounded-xl border border-amber-200/90 space-y-2 shadow-2xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {/* Set Jumlah Extrabed */}
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-700 block">
+                              Set Jumlah Extrabed:
+                            </label>
+                            <div className="inline-flex items-center w-full rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
+                              <input
+                                type="number"
+                                min={1}
+                                max={100}
+                                value={extrabedUnitsCount}
+                                onChange={(e) => {
+                                  const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                  updateField('customExtrabedCount', val);
+                                }}
+                                className="w-full h-7 px-2 text-center font-mono text-xs font-bold focus:outline-none"
+                              />
+                              <span className="px-2 py-1 text-[11px] font-semibold text-slate-500 bg-slate-50 border-l border-slate-200 shrink-0">
+                                Bed
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Set Harga Extrabed */}
+                          <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-700 block">
+                              Set Harga Extrabed:
+                            </label>
+                            <div className="inline-flex items-center w-full rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
+                              <span className="px-1.5 py-1 text-[10px] font-mono font-bold text-slate-400 bg-slate-50 border-r border-slate-200 shrink-0">
+                                Rp
+                              </span>
+                              <input
+                                type="number"
+                                step={25000}
+                                value={state.extrabedPrice ?? 250000}
+                                onChange={(e) => {
+                                  const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                  updateField('extrabedPrice', val);
+                                }}
+                                className="w-full h-7 px-2 text-right font-mono text-xs font-bold focus:outline-none"
+                              />
+                              <span className="px-1.5 py-1 text-[10px] font-semibold text-slate-500 bg-slate-50 border-l border-slate-200 shrink-0">
+                                / malam
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-[11px] text-amber-900 bg-amber-50/80 p-2 rounded-lg border border-amber-200/60 leading-relaxed">
+                          <p className="font-medium">
+                            ✓ Kebutuhan kamar berkurang menjadi <strong>{regularRoomsCount} Kamar</strong> (+ <strong>{extrabedUnitsCount} Bed Extrabed</strong> @ {formatRupiah(state.extrabedPrice ?? 250000)}) untuk {regularPax} pax.
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
