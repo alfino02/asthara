@@ -247,7 +247,7 @@ export default function ResultsWorkspace({
   };
 
   // Strictly only show quotations belonging to the selected entity
-  const brandQuotations = db.quotations.filter((q) => q.brand === brand);
+  const brandQuotations = (db.quotations || []).filter((q) => q.brand === brand);
   const filteredQuotations = brandQuotations.filter((q) => {
     if (
       historySearch &&

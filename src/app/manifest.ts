@@ -7,6 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       'Platform Monolith Perhitungan HPP, RAB, Manajemen Armada Harian, dan Generator Proposal PDF untuk Nabila Trip dan Piknik Enthusiast.',
     start_url: '/',
+    scope: '/',
     id: '/',
     display: 'standalone',
     background_color: '#020617',

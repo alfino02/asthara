@@ -13,42 +13,86 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function PwaRegistration() {
+  const [mounted, setMounted] = useState(false);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // 1. Register Service Worker
+    setMounted(true);
+
+    // 1. Service Worker Registration & Version Sync
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then((reg) => {
-            console.log('[PWA] Service Worker registered:', reg.scope);
-          })
-          .catch((err) => {
-            console.warn('[PWA] Service Worker registration failed:', err);
+      const registerSw = async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('/sw.js');
+          console.log('[PWA] Service Worker registered with scope:', reg.scope);
+
+          // Force check for sw updates
+          reg.update().catch(() => {});
+
+          reg.addEventListener('updatefound', () => {
+            const installingWorker = reg.installing;
+            if (installingWorker) {
+              installingWorker.addEventListener('statechange', () => {
+                if (
+                  installingWorker.state === 'installed' &&
+                  navigator.serviceWorker.controller
+                ) {
+                  console.log('[PWA] New version available, triggering skipWaiting');
+                  installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                }
+              });
+            }
           });
-      });
+        } catch (err) {
+          console.warn('[PWA] Service Worker registration failed:', err);
+        }
+      };
+
+      if (
+        document.readyState === 'complete' ||
+        document.readyState === 'interactive'
+      ) {
+        registerSw();
+      } else {
+        window.addEventListener('load', registerSw);
+      }
     }
 
-    // 2. Check if already running in standalone mode (installed)
-    if (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true
-    ) {
-      setIsInstalled(true);
-      return;
+    // 2. Safe check if already running in standalone mode (installed)
+    try {
+      const isStandaloneMedia =
+        typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(display-mode: standalone)').matches;
+
+      const isIosStandalone =
+        typeof window !== 'undefined' &&
+        Boolean(
+          (window.navigator as unknown as { standalone?: boolean })?.standalone
+        );
+
+      if (isStandaloneMedia || isIosStandalone) {
+        setIsInstalled(true);
+        return;
+      }
+    } catch {
+      // Fallback: proceed normally
     }
 
     // 3. Listen for browser install prompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Show install banner only if user hasn't dismissed it in this session
-      const dismissed = sessionStorage.getItem('asthara_pwa_dismissed');
-      if (!dismissed) {
+
+      try {
+        const dismissed = sessionStorage.getItem('asthara_pwa_dismissed');
+        if (!dismissed) {
+          setShowInstallBanner(true);
+        }
+      } catch {
         setShowInstallBanner(true);
       }
     };
@@ -60,10 +104,7 @@ export default function PwaRegistration() {
       console.log('[PWA] App successfully installed!');
     };
 
-    window.addEventListener(
-      'beforeinstallprompt',
-      handleBeforeInstallPrompt
-    );
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
@@ -77,21 +118,28 @@ export default function PwaRegistration() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('[PWA] User accepted install prompt');
-      setShowInstallBanner(false);
+    try {
+      await deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        setShowInstallBanner(false);
+      }
+    } catch (err) {
+      console.warn('[PWA] Install prompt error:', err);
     }
     setDeferredPrompt(null);
   };
 
   const handleDismiss = () => {
     setShowInstallBanner(false);
-    sessionStorage.setItem('asthara_pwa_dismissed', '1');
+    try {
+      sessionStorage.setItem('asthara_pwa_dismissed', '1');
+    } catch {
+      // Storage restricted
+    }
   };
 
-  if (isInstalled || !showInstallBanner) {
+  if (!mounted || isInstalled || !showInstallBanner) {
     return null;
   }
 

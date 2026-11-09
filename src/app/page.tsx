@@ -76,7 +76,14 @@ export default function HomePage() {
       .then((res) => res.json())
       .then((res) => {
         if (res.success && res.data) {
-          setDb(res.data);
+          setDb((prev) => ({
+            destinasi: Array.isArray(res.data.destinasi) ? res.data.destinasi : prev.destinasi,
+            armada: Array.isArray(res.data.armada) ? res.data.armada : prev.armada,
+            hotel: Array.isArray(res.data.hotel) ? res.data.hotel : prev.hotel,
+            jeep: Array.isArray(res.data.jeep) ? res.data.jeep : prev.jeep,
+            operasional: Array.isArray(res.data.operasional) ? res.data.operasional : prev.operasional,
+            quotations: Array.isArray(res.data.quotations) ? res.data.quotations : (prev.quotations || []),
+          }));
         }
       })
       .catch((err) => console.error('Gagal memuat /api/master:', err));
@@ -110,7 +117,7 @@ export default function HomePage() {
 
   const activeBrandMeta = BRANDS[selectedBrand];
   const isNabila = selectedBrand === 'nabila';
-  const brandQuotationsCount = db.quotations.filter(
+  const brandQuotationsCount = (db.quotations || []).filter(
     (q) => q.brand === selectedBrand
   ).length;
 
