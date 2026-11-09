@@ -323,7 +323,7 @@ export default function HomePage() {
   const displayParameterPanel = !isWideView || showParameterPanel;
 
   return (
-    <div className="min-h-screen bg-slate-100/90 text-slate-900 flex flex-col lg:flex-row print:h-auto print:overflow-visible">
+    <div className="min-h-screen bg-slate-100/90 text-slate-900 print:h-auto print:overflow-visible">
       {/* Toast Notification */}
       {toastMsg && (
         <div className="fixed top-4 right-4 z-50 bg-slate-950 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-800 flex items-center gap-2.5 text-xs font-bold">
@@ -381,16 +381,16 @@ export default function HomePage() {
         />
       )}
 
-      {/* MODERN HIDEABLE OBSIDIAN LEFT SIDEBAR */}
+      {/* MODERN FIXED OBSIDIAN LEFT SIDEBAR */}
       <aside
-        className={`no-print fixed lg:sticky top-0 left-0 z-50 lg:z-20 h-screen bg-slate-950 text-white border-r border-slate-800/80 flex flex-col justify-between transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-          mobileSidebarOpen
-            ? 'translate-x-0 w-72 shadow-2xl'
-            : '-translate-x-full lg:translate-x-0'
-        } ${
+        className={`no-print fixed top-0 bottom-0 left-0 z-40 h-screen w-64 bg-slate-950 text-white border-r border-slate-800/90 flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${
           desktopSidebarHidden
-            ? 'lg:w-0 lg:border-r-0 lg:opacity-0 lg:pointer-events-none'
-            : 'lg:w-68 lg:opacity-100'
+            ? 'lg:-translate-x-full lg:w-0 lg:border-r-0 lg:opacity-0 lg:pointer-events-none'
+            : 'lg:translate-x-0 lg:w-64 lg:opacity-100'
+        } ${
+          mobileSidebarOpen
+            ? 'translate-x-0 w-72 z-50 shadow-2xl'
+            : 'max-lg:-translate-x-full'
         }`}
       >
         {/* Subtle Brand Radial Glow inside Sidebar */}
@@ -400,67 +400,66 @@ export default function HomePage() {
           }`}
         />
 
-        {/* Top Section: Active Entity Branding & Navigation Menu */}
-        <div className="relative z-10 p-4 space-y-5 overflow-y-auto w-72 lg:w-68">
-          {/* Active Brand Header inside Sidebar + Hide Button */}
-          <div className="flex items-start justify-between gap-2 pb-4 border-b border-slate-800/90">
-            <div className="flex items-center gap-3 min-w-0">
-              <div
-                className={`w-11 h-11 rounded-2xl bg-slate-900 p-1.5 flex items-center justify-center shrink-0 shadow-lg border ${
+        {/* 1. PINNED TOP HEADER: Brand Logo, Legal Entity, Collapse Button */}
+        <div className="shrink-0 p-4 border-b border-slate-800/90 flex items-center justify-between gap-2 relative z-10 bg-slate-950">
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className={`w-10 h-10 rounded-2xl bg-slate-900 p-1.5 flex items-center justify-center shrink-0 shadow-lg border ${
+                isNabila
+                  ? 'border-red-500/40 shadow-red-600/10'
+                  : 'border-orange-500/40 shadow-orange-500/10'
+              }`}
+            >
+              <img
+                src={activeBrandMeta.logoUrl}
+                alt={activeBrandMeta.name}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-sm font-black tracking-tight text-white truncate">
+                {activeBrandMeta.name}
+              </h1>
+              <span
+                className={`inline-block mt-0.5 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${
                   isNabila
-                    ? 'border-red-500/40 shadow-red-600/10'
-                    : 'border-orange-500/40 shadow-orange-500/10'
+                    ? 'bg-red-500/15 text-red-300 border border-red-500/30'
+                    : 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
                 }`}
               >
-                <img
-                  src={activeBrandMeta.logoUrl}
-                  alt={activeBrandMeta.name}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm font-black tracking-tight text-white truncate">
-                  {activeBrandMeta.name}
-                </h1>
-                <span
-                  className={`inline-block mt-0.5 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${
-                    isNabila
-                      ? 'bg-red-500/15 text-red-300 border border-red-500/30'
-                      : 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
-                  }`}
-                >
-                  {activeBrandMeta.legalEntity}
-                </span>
-              </div>
+                {activeBrandMeta.legalEntity}
+              </span>
             </div>
-
-            {/* Hide Sidebar Button (Desktop) */}
-            <button
-              type="button"
-              onClick={() => setDesktopSidebarHidden(true)}
-              className="hidden lg:flex p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition"
-              title="Sembunyikan Sidebar"
-            >
-              <PanelLeftClose className="w-4 h-4" />
-            </button>
-
-            {/* Close Drawer Button (Mobile) */}
-            <button
-              type="button"
-              onClick={() => setMobileSidebarOpen(false)}
-              className="lg:hidden p-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
 
-          {/* Menu Navigation Group */}
-          <div className="space-y-2">
-            <div className="px-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500">
-              Menu Navigasi Workspace
+          {/* Hide Sidebar Button (Desktop) */}
+          <button
+            type="button"
+            onClick={() => setDesktopSidebarHidden(true)}
+            className="hidden lg:flex p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition"
+            title="Sembunyikan Sidebar"
+          >
+            <PanelLeftClose className="w-4 h-4" />
+          </button>
+
+          {/* Close Drawer Button (Mobile) */}
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(false)}
+            className="lg:hidden p-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 2. SCROLLABLE MIDDLE: Workspace Navigation Menu & Live Client Summary */}
+        <div className="flex-1 overflow-y-auto p-3.5 space-y-4 relative z-10 [scrollbar-width:none]">
+          <div className="space-y-1.5">
+            <div className="px-2 pb-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+              Workspace
             </div>
 
-            <nav className="space-y-1.5">
+            <nav className="space-y-1">
               {sidebarMenuItems.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
@@ -468,17 +467,17 @@ export default function HomePage() {
                     key={item.id}
                     type="button"
                     onClick={() => selectSidebarTab(item.id)}
-                    className={`w-full text-left px-3 py-2.5 rounded-2xl transition-all flex items-center justify-between gap-2.5 group relative overflow-hidden ${
+                    className={`w-full text-left px-3 py-2 rounded-xl transition-all flex items-center justify-between gap-2.5 group relative overflow-hidden ${
                       isActive
                         ? isNabila
-                          ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-600/25'
-                          : 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-600/25'
+                          ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md shadow-red-600/25'
+                          : 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-600/25'
                         : 'text-slate-400 hover:bg-slate-900/90 hover:text-white border border-transparent hover:border-slate-800'
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <span
-                        className={`p-1.5 rounded-xl transition ${
+                        className={`p-1 rounded-lg transition ${
                           isActive
                             ? 'bg-white/20 text-white'
                             : 'bg-slate-900 text-slate-400 group-hover:text-white group-hover:bg-slate-800'
@@ -490,22 +489,15 @@ export default function HomePage() {
                         <div className="text-xs font-bold truncate">
                           {item.label}
                         </div>
-                        <div
-                          className={`text-[10px] truncate ${
-                            isActive ? 'text-white/80' : 'text-slate-500'
-                          }`}
-                        >
-                          {item.desc}
-                        </div>
                       </div>
                     </div>
 
                     {item.badge !== undefined && (
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-black shrink-0 ${
+                        className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono font-bold shrink-0 ${
                           isActive
-                            ? 'bg-black/25 text-white'
-                            : 'bg-slate-900 text-slate-300 border border-slate-800'
+                            ? 'bg-black/30 text-white'
+                            : 'bg-slate-900 text-slate-400 border border-slate-800'
                         }`}
                       >
                         {item.badge}
@@ -517,18 +509,18 @@ export default function HomePage() {
             </nav>
           </div>
 
-          {/* Live Glassmorphic Quick Summary Box inside Sidebar */}
-          <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800/90 space-y-2 shadow-inner">
+          {/* Live Quick Client Summary Box inside Sidebar */}
+          <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800/90 space-y-1.5 shadow-inner">
             <div className="flex items-center justify-between text-[10px] font-bold uppercase text-slate-400">
               <span>Ringkasan Klien</span>
-              <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-200 font-mono text-[10px]">
+              <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-200 font-mono text-[10px]">
                 {calc.totalPax} Pax • {calc.days}H{calc.nights}M
               </span>
             </div>
             <div className="text-xs font-bold text-white truncate">
               {state.tripName || 'Custom Tour'}
             </div>
-            <div className="pt-2 border-t border-slate-800 flex items-baseline justify-between">
+            <div className="pt-1.5 border-t border-slate-800/80 flex items-baseline justify-between">
               <span className="text-[10px] text-slate-400">Harga/Pax:</span>
               <span
                 className={`text-xs font-black font-mono ${
@@ -541,13 +533,13 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Bottom Section: Action Buttons (Simpan HPP, Reset, Ganti Entitas) */}
-        <div className="relative z-10 p-4 border-t border-slate-800/90 bg-slate-950/90 space-y-2 w-72 lg:w-68">
+        {/* 3. PINNED BOTTOM: Quick Actions */}
+        <div className="shrink-0 p-3.5 border-t border-slate-800/90 bg-slate-950 space-y-2 relative z-10">
           <button
             type="button"
             disabled={savingQuote}
             onClick={handleSaveQuotation}
-            className="w-full px-3.5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/20"
+            className="w-full px-3 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white flex items-center justify-center gap-1.5 transition shadow-md shadow-emerald-600/20"
           >
             <Save className="w-3.5 h-3.5" />
             <span>{savingQuote ? 'Menyimpan...' : 'Simpan Penawaran HPP'}</span>
@@ -560,20 +552,20 @@ export default function HomePage() {
                 setState(createDefaultCalculatorState(db, selectedBrand));
                 showToast('Parameter dikembalikan ke standar awal.');
               }}
-              className="px-2.5 py-2 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center gap-1.5 transition"
+              className="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center gap-1 transition"
               title="Reset Parameter Kalkulator"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3 h-3" />
               <span>Reset</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowEntityModal(true)}
-              className="px-2.5 py-2 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center gap-1.5 transition"
+              className="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 flex items-center justify-center gap-1 transition"
               title="Buka Layar Pilihan Profil Entitas"
             >
-              <ArrowLeftRight className="w-3.5 h-3.5" />
+              <ArrowLeftRight className="w-3 h-3" />
               <span>Entitas</span>
             </button>
           </div>
@@ -581,7 +573,11 @@ export default function HomePage() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 min-w-0 pb-16 lg:pb-12 print:h-auto print:overflow-visible">
+      <div
+        className={`flex-1 min-w-0 pb-16 lg:pb-12 transition-all duration-300 ease-in-out print:h-auto print:overflow-visible print:pl-0 ${
+          desktopSidebarHidden ? 'lg:pl-0' : 'lg:pl-64'
+        }`}
+      >
         <main className="max-w-[1680px] mx-auto px-3 sm:px-6 pt-3 space-y-4">
           {/* MODERN TOP COMMAND BAR + KPI SUMMARY CARDS */}
           <div className="no-print space-y-3 shrink-0">
