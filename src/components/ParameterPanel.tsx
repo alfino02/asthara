@@ -35,6 +35,7 @@ import {
   ChevronDown,
   ChevronUp,
   Briefcase,
+  Tag,
 } from 'lucide-react';
 
 interface ParameterPanelProps {
@@ -2361,6 +2362,65 @@ export default function ParameterPanel({
                     <span className="px-2 text-xs font-semibold text-slate-500 border-l border-slate-200">
                       Pcs
                     </span>
+                  </div>
+                ) : (
+                  <span className="text-xs font-mono font-bold text-slate-400">
+                    Nonaktif
+                  </span>
+                )}
+              </div>
+
+              {/* Spare Diskon */}
+              <div className="p-3 sm:p-3.5 rounded-xl border border-slate-200 bg-white shadow-2xs flex flex-wrap items-center justify-between gap-3">
+                <label className="inline-flex items-center gap-2.5 cursor-pointer font-bold text-slate-800 text-xs sm:text-sm">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(state.incSpareDiskon)}
+                    onChange={(e) => updateField('incSpareDiskon', e.target.checked)}
+                    className="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500"
+                  />
+                  <span className="flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Spare Diskon</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+                      Ruang Negosiasi
+                    </span>
+                  </span>
+                </label>
+
+                {state.incSpareDiskon ? (
+                  <div className="flex items-center gap-1.5">
+                    <div className="inline-flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
+                      <span className="px-2 py-1 text-[11px] font-mono font-bold text-slate-400 bg-slate-50 border-r border-slate-200">
+                        Rp
+                      </span>
+                      <input
+                        type="number"
+                        step={5000}
+                        min={0}
+                        value={state.spareDiskonNominal ?? 50000}
+                        onChange={(e) =>
+                          updateField(
+                            'spareDiskonNominal',
+                            parseInt(e.target.value, 10) || 0
+                          )
+                        }
+                        className="w-24 h-8 px-2 text-right font-mono font-bold text-xs bg-white focus:outline-none"
+                      />
+                    </div>
+                    <select
+                      value={state.spareDiskonMode || 'per_pax'}
+                      onChange={(e) =>
+                        updateField(
+                          'spareDiskonMode',
+                          e.target.value as 'per_pax' | 'total'
+                        )
+                      }
+                      className="h-8 px-2 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-700 focus:outline-none"
+                    >
+                      <option value="per_pax">/ Pax</option>
+                      <option value="total">Total</option>
+                    </select>
                   </div>
                 ) : (
                   <span className="text-xs font-mono font-bold text-slate-400">

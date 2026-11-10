@@ -209,6 +209,11 @@ export interface CalculatorState {
   bannerCount?: number;
   incP3k: boolean;
 
+  // Spare Diskon & Negosiasi
+  incSpareDiskon?: boolean;
+  spareDiskonNominal?: number; // default 50000
+  spareDiskonMode?: 'per_pax' | 'total'; // default 'per_pax'
+
   // Profit & Tax
   enableLaba: boolean;
   marginPct: number;

@@ -254,6 +254,9 @@ export function createDefaultCalculatorState(
     customGuideCounts: {},
     incBanner: true,
     incP3k: true,
+    incSpareDiskon: false,
+    spareDiskonNominal: 50000,
+    spareDiskonMode: 'per_pax',
 
     enableLaba: true,
     marginPct: 20,
@@ -1034,6 +1037,41 @@ export function calculateTrip(
       defaultUnitPrice: defP3k,
       subtotal: effP3k,
       isOverridden,
+    });
+  }
+
+  // Spare Diskon & Cadangan Negosiasi Sales
+  if (state.incSpareDiskon) {
+    const diskonNominal = Math.max(0, Number(state.spareDiskonNominal) ?? 50000);
+    const isPerPax = (state.spareDiskonMode || 'per_pax') === 'per_pax';
+    const mult = isPerPax ? totalPax : 1;
+    const volText = isPerPax ? `${totalPax} Pax` : '1 Paket';
+    const { price: effDiskon, isOverridden } = resolvePrice('spare_diskon', diskonNominal);
+    const subtotal = mult * effDiskon;
+
+    rabItems.push({
+      key: 'spare_diskon',
+      category: 'Logistik',
+      label: 'Spare Diskon & Cadangan Negosiasi',
+      subLabel: isPerPax
+        ? `Alokasi cadangan diskon ${formatRupiah(effDiskon)} / pax untuk negosiasi sales`
+        : `Alokasi cadangan diskon ${formatRupiah(effDiskon)} per total paket`,
+      volumeText: volText,
+      multiplier: mult,
+      unitPrice: effDiskon,
+      defaultUnitPrice: diskonNominal,
+      subtotal,
+      isOverridden,
+    });
+
+    manifestItems.push({
+      kategori: 'Cadangan Diskon',
+      spesifikasi: isPerPax
+        ? `Spare Diskon Negosiasi (${formatRupiah(effDiskon)}/pax)`
+        : `Spare Diskon Negosiasi (${formatRupiah(effDiskon)}/paket)`,
+      jumlahSatuan: volText,
+      keteranganLapangan: 'Buffer penawaran harga & toleransi negosiasi sales',
+      status: 'aktif',
     });
   }
 
