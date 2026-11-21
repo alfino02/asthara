@@ -106,7 +106,13 @@ export default function EntitySelectorScreen({
 
                 <div className="relative z-10">
                   <div className="flex items-start justify-between gap-3 mb-5">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-950 p-2.5 flex items-center justify-center border border-slate-800 shrink-0 shadow-xl ring-1 ring-white/10">
+                    <div
+                      className={`w-16 h-16 rounded-2xl p-2 flex items-center justify-center border shrink-0 shadow-xl ${
+                        isNabila
+                          ? 'bg-slate-950 border-slate-800 ring-1 ring-white/10'
+                          : 'bg-white border-orange-200/80 ring-1 ring-orange-400/20'
+                      }`}
+                    >
                       <img
                         src={b.logoUrl}
                         alt={b.name}

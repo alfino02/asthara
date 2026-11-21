@@ -369,7 +369,13 @@ export default function HomePage() {
           >
             <Menu className="w-4 h-4" />
           </button>
-          <div className="w-8 h-8 rounded-lg bg-slate-900 p-1 flex items-center justify-center shrink-0 border border-slate-800">
+          <div
+            className={`w-8 h-8 rounded-lg p-1 flex items-center justify-center shrink-0 border ${
+              isNabila
+                ? 'bg-slate-900 border-slate-800'
+                : 'bg-white border-orange-200/80'
+            }`}
+          >
             <img
               src={activeBrandMeta.logoUrl}
               alt={activeBrandMeta.name}
@@ -430,10 +436,10 @@ export default function HomePage() {
         <div className="shrink-0 p-4 border-b border-slate-800/90 flex items-center justify-between gap-2 relative z-10 bg-slate-950">
           <div className="flex items-center gap-3 min-w-0">
             <div
-              className={`w-10 h-10 rounded-2xl bg-slate-900 p-1.5 flex items-center justify-center shrink-0 shadow-lg border ${
+              className={`w-10 h-10 rounded-2xl p-1.5 flex items-center justify-center shrink-0 shadow-lg border ${
                 isNabila
-                  ? 'border-red-500/40 shadow-red-600/10'
-                  : 'border-orange-500/40 shadow-orange-500/10'
+                  ? 'bg-slate-900 border-red-500/40 shadow-red-600/10'
+                  : 'bg-white border-orange-300/60 shadow-orange-500/15'
               }`}
             >
               <img

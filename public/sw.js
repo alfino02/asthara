@@ -1,12 +1,12 @@
-// PT ASTHARA PWA Service Worker v2 (Resilient & Skew-Protected)
-const CACHE_NAME = 'asthara-pwa-v2';
+// PT ASTHARA PWA Service Worker v3 (Resilient & Skew-Protected)
+const CACHE_NAME = 'asthara-pwa-v3';
 
 // Precache ONLY static unchanging assets (NEVER precache '/' dynamic HTML or Next chunks)
 const PRECACHE_ASSETS = [
   '/manifest.webmanifest',
   '/manifest.json',
   '/logos/nabila.png',
-  '/logos/piknik.png',
+  '/logos/piknik.webp',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
   '/icons/icon-maskable-192x192.png',
