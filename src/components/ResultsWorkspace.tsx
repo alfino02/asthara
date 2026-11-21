@@ -25,6 +25,7 @@ import {
   FileText,
   Database,
   History,
+  Printer,
 } from 'lucide-react';
 
 export type WorkspaceTab =
@@ -47,6 +48,9 @@ interface ResultsWorkspaceProps {
   onResetMaster: () => Promise<void>;
   onLoadQuotation: (q: QuotationRecord) => void;
   onDeleteQuotation: (quoteId: string) => Promise<void>;
+  includeRabInPdf: boolean;
+  onToggleIncludeRab: (val: boolean) => void;
+  onPrintPdf: (forceIncludeRab?: boolean) => void;
 }
 
 export function KpiSummaryCards({
@@ -183,6 +187,9 @@ export default function ResultsWorkspace({
   onResetMaster,
   onLoadQuotation,
   onDeleteQuotation,
+  includeRabInPdf,
+  onToggleIncludeRab,
+  onPrintPdf,
 }: ResultsWorkspaceProps) {
   const [historySearch, setHistorySearch] = useState<string>('');
 
@@ -508,6 +515,18 @@ export default function ResultsWorkspace({
               )}
               <button
                 type="button"
+                onClick={() => onPrintPdf(true)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold text-white flex items-center gap-1.5 transition shadow-2xs ${
+                  isNabila
+                    ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500'
+                    : 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500'
+                }`}
+              >
+                <Printer className="w-3 h-3" />
+                <span>Export PDF</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleExportRabCsv}
                 className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 flex items-center gap-1.5 transition shadow-2xs"
               >
@@ -642,10 +661,18 @@ export default function ResultsWorkspace({
         </div>
       )}
 
-      {/* ================= VIEW 3: PROPOSAL PENAWARAN KLIEN (4-PAGE A4) ================= */}
+      {/* ================= VIEW 3: PROPOSAL PENAWARAN KLIEN + RAB HPP (A4 PDF) ================= */}
       {activeTab === 'proposal' && (
-        <div className="flex-1 h-full overflow-hidden print:h-auto print:overflow-visible">
-          <ProposalPreview brand={brand} state={state} calc={calc} db={db} />
+        <div className="flex-1 h-full overflow-hidden">
+          <ProposalPreview
+            brand={brand}
+            state={state}
+            calc={calc}
+            db={db}
+            includeRabInPdf={includeRabInPdf}
+            onToggleIncludeRab={onToggleIncludeRab}
+            onPrintPdf={() => onPrintPdf()}
+          />
         </div>
       )}
 

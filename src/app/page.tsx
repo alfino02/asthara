@@ -16,6 +16,7 @@ import {
 } from '@/lib/calculator';
 import EntitySelectorScreen from '@/components/BrandSelectorModal';
 import ParameterPanel from '@/components/ParameterPanel';
+import ProposalDocumentPages from '@/components/ProposalDocumentPages';
 import ResultsWorkspace, {
   KpiSummaryCards,
   WorkspaceTab,
@@ -52,6 +53,7 @@ export default function HomePage() {
   const [desktopSidebarHidden, setDesktopSidebarHidden] =
     useState<boolean>(false);
   const [showParameterPanel, setShowParameterPanel] = useState<boolean>(false);
+  const [includeRabInPdf, setIncludeRabInPdf] = useState<boolean>(true);
 
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -291,7 +293,7 @@ export default function HomePage() {
     {
       id: 'proposal',
       label: 'Proposal Klien (PDF)',
-      desc: 'Dokumen penawaran 4 halaman A4',
+      desc: 'Dokumen penawaran & RAB HPP A4',
       icon: <FileText className="w-4 h-4 shrink-0" />,
     },
     {
@@ -315,8 +317,39 @@ export default function HomePage() {
     activeTab === 'history';
   const displayParameterPanel = !isWideView || showParameterPanel;
 
+  const triggerCleanPrint = (withRab: boolean) => {
+    if (typeof window === 'undefined') return;
+    const prevTitle = document.title;
+    const safeName = (state.tripName || 'Custom_Trip')
+      .replace(/[^a-zA-Z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '_');
+    const docSuffix = withRab ? 'Proposal_RAB_HPP' : 'Proposal';
+    document.title = `${docSuffix}_${activeBrandMeta.shortName}_${safeName}_${calc.totalPax}Pax`;
+
+    const restoreTitle = () => {
+      document.title = prevTitle;
+      window.removeEventListener('afterprint', restoreTitle);
+    };
+    window.addEventListener('afterprint', restoreTitle);
+    window.print();
+    setTimeout(restoreTitle, 4000);
+  };
+
+  const handlePrintPdf = (forceIncludeRab?: boolean) => {
+    if (forceIncludeRab && !includeRabInPdf) {
+      setIncludeRabInPdf(true);
+      requestAnimationFrame(() => {
+        setTimeout(() => triggerCleanPrint(true), 80);
+      });
+      return;
+    }
+    triggerCleanPrint(Boolean(forceIncludeRab ?? includeRabInPdf));
+  };
+
   return (
-    <div className="min-h-screen bg-slate-100/90 text-slate-900 print:h-auto print:overflow-visible">
+    <>
+    <div id="app-workspace-root" className="min-h-screen bg-slate-100/90 text-slate-900 print:hidden">
       {/* Toast Notification */}
       {toastMsg && (
         <div className="fixed top-4 right-4 z-50 bg-slate-950 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-800 flex items-center gap-2.5 text-xs font-bold">
@@ -746,6 +779,9 @@ export default function HomePage() {
                 onResetMaster={handleResetMaster}
                 onLoadQuotation={handleLoadQuotation}
                 onDeleteQuotation={handleDeleteQuotation}
+                includeRabInPdf={includeRabInPdf}
+                onToggleIncludeRab={setIncludeRabInPdf}
+                onPrintPdf={handlePrintPdf}
               />
             </div>
           </div>
@@ -805,5 +841,18 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+
+    {/* DEDICATED PRINT-ONLY ROOT (Direct top-level sibling for bulletproof multi-page A4 PDF export) */}
+    <div id="pdf-print-root" className="hidden print:block bg-white text-slate-900">
+      <ProposalDocumentPages
+        brand={selectedBrand}
+        state={state}
+        calc={calc}
+        db={db}
+        includeRab={includeRabInPdf}
+        mode="print"
+      />
+    </div>
+    </>
   );
 }
