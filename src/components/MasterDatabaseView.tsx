@@ -270,13 +270,14 @@ export default function MasterDatabaseView({
         tabIndex={0}
       >
         {activeTable === 'destinasi' && (
-          <table className="w-full text-left border-collapse text-xs min-w-[800px]">
+          <table className="w-full text-left border-collapse text-xs min-w-[920px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
                 <th className="p-2.5 w-16">ID</th>
                 <th className="p-2.5">Nama Objek Wisata</th>
                 <th className="p-2.5">Wilayah / Kota</th>
-                <th className={`p-2.5 text-right ${priceHeadBg}`}>HTM Domestik (Rp)</th>
+                <th className={`p-2.5 text-right ${priceHeadBg}`}>HTM WNI (Rp)</th>
+                <th className="p-2.5 text-right bg-amber-50/70 text-amber-800">HTM WNA (Rp)</th>
                 <th className="p-2.5 text-center">Wajib Guide?</th>
                 <th className="p-2.5 text-right">Biaya Guide (Rp)</th>
                 <th className="p-2.5 text-center whitespace-nowrap">Kapasitas Guide</th>
@@ -325,7 +326,23 @@ export default function MasterDatabaseView({
                           : { ...row, htmDomestikPiknik: val };
                         setLocalDb({ ...localDb, destinasi: next });
                       }}
-                      className={`w-28 px-2 py-1 text-right font-mono font-semibold border ${priceInputBorder} rounded bg-white text-slate-900`}
+                      className={`w-24 px-2 py-1 text-right font-mono font-semibold border ${priceInputBorder} rounded bg-white text-slate-900`}
+                    />
+                  </td>
+                  <td className="p-2 bg-amber-50/40">
+                    <input
+                      type="number"
+                      step={5000}
+                      value={isNabila ? row.htmMancanegaraNabila : row.htmMancanegaraPiknik}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10) || 0;
+                        const next = [...localDb.destinasi];
+                        next[idx] = isNabila
+                          ? { ...row, htmMancanegaraNabila: val }
+                          : { ...row, htmMancanegaraPiknik: val };
+                        setLocalDb({ ...localDb, destinasi: next });
+                      }}
+                      className="w-24 px-2 py-1 text-right font-mono font-semibold border border-amber-200 rounded bg-white text-amber-950"
                     />
                   </td>
                   <td className="p-2 text-center">

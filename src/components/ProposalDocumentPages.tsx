@@ -334,15 +334,21 @@ export default function ProposalDocumentPages({
                 </div>
                 <div className="flex justify-between gap-2">
                   <span className="text-slate-500">Jumlah Peserta</span>
-                  <span className="font-mono font-bold text-slate-900">
-                    {calc.totalPax} Pax ({calc.regularPax} Reg
-                    {calc.vipPax > 0 ? ` + ${calc.vipPax} VIP` : ''})
+                  <span className="font-mono font-bold text-slate-900 text-right">
+                    {calc.totalPax} Pax ({calc.wniPax > 0 ? `${calc.wniPax} WNI` : ''}
+                    {calc.wniPax > 0 && calc.wnaPax > 0 ? ' + ' : ''}
+                    {calc.wnaPax > 0 ? `${calc.wnaPax} WNA` : ''}
+                    {calc.vipPax > 0 ? ` • ${calc.vipPax} VIP` : ''})
                   </span>
                 </div>
                 <div className="flex justify-between gap-2">
                   <span className="text-slate-500">Kategori Tamu</span>
-                  <span className="font-semibold text-slate-800">
-                    {state.isForeigner ? 'Mancanegara (WNA)' : 'Domestik (WNI)'}
+                  <span className="font-semibold text-slate-800 text-right">
+                    {calc.wniPax > 0 && calc.wnaPax > 0
+                      ? `Campuran (${calc.wniPax} WNI & ${calc.wnaPax} WNA)`
+                      : calc.wnaPax > 0
+                      ? 'Mancanegara (WNA)'
+                      : 'Domestik (WNI)'}
                   </span>
                 </div>
                 <div className="flex justify-between gap-2">
@@ -1222,6 +1228,12 @@ export default function ProposalDocumentPages({
                   <span className="text-slate-500">Peserta & Durasi</span>
                   <span className="font-mono font-bold text-slate-800">
                     {calc.totalPax} Pax • {calc.days}H{calc.nights}M
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Komposisi WNI/WNA</span>
+                  <span className="font-mono font-bold text-slate-800">
+                    {calc.wniPax} WNI{calc.wnaPax > 0 ? ` + ${calc.wnaPax} WNA` : ''}
                   </span>
                 </div>
                 <div className="flex justify-between">

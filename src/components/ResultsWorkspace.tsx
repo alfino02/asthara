@@ -107,13 +107,17 @@ export function KpiSummaryCards({
             {formatRupiah(calc.hppPerPax)}
           </div>
           <div className="text-[10px] font-medium text-slate-600 truncate mt-0.5">
-            {calc.vipPax > 0 ? (
+            {calc.wnaPax > 0 ? (
+              <span>
+                <b className="text-slate-900 font-mono">{calc.totalPax}p</b> ({calc.wniPax} WNI + {calc.wnaPax} WNA)
+              </span>
+            ) : calc.vipPax > 0 ? (
               <span>
                 Beban <b className="text-slate-900 font-mono">{calc.totalPax}p</b> ({calc.regularPax}R+{calc.vipPax}V)
               </span>
             ) : (
               <span>
-                Beban <b className="text-slate-900 font-mono">{calc.totalPax} peserta</b>
+                Beban <b className="text-slate-900 font-mono">{calc.totalPax} WNI</b>
               </span>
             )}
           </div>
@@ -206,7 +210,9 @@ export default function ResultsWorkspace({
     const rows = [
       ['KALKULATOR HPP & LOGISTIK CUSTOM TRIP - ' + brand.toUpperCase()],
       ['Nama Klien', state.tripName],
-      ['Jumlah Peserta (Pax)', String(calc.totalPax)],
+      ['Total Peserta (Pax)', String(calc.totalPax)],
+      ['Peserta WNI (Domestik)', String(calc.wniPax)],
+      ['Peserta WNA (Mancanegara)', String(calc.wnaPax)],
       ['Durasi Tour (Hari)', String(calc.days)],
       ['Harga Jual / Pax', String(calc.sellingPricePerPax)],
       ['HPP Modal / Pax', String(calc.hppPerPax)],

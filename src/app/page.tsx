@@ -180,9 +180,24 @@ export default function HomePage() {
     try {
       const parsed = JSON.parse(q.payloadJson || '{}');
       const defaults = createDefaultCalculatorState(db, selectedBrand);
+      const hasSplit = parsed.paxWni !== undefined || parsed.paxWna !== undefined;
+      const loadedPax = Number(parsed.pax) || defaults.pax;
+      const loadedWni = hasSplit
+        ? Math.max(0, Number(parsed.paxWni) || 0)
+        : parsed.isForeigner
+        ? 0
+        : loadedPax;
+      const loadedWna = hasSplit
+        ? Math.max(0, Number(parsed.paxWna) || 0)
+        : parsed.isForeigner
+        ? loadedPax
+        : 0;
       setState({
         ...defaults,
         ...parsed,
+        pax: Math.max(1, loadedWni + loadedWna),
+        paxWni: loadedWni,
+        paxWna: loadedWna,
         armadaPlanByDay: parsed.armadaPlanByDay || defaults.armadaPlanByDay,
         hotelPlanByNight: parsed.hotelPlanByNight || defaults.hotelPlanByNight,
         mealPlanByDay: parsed.mealPlanByDay || defaults.mealPlanByDay,
@@ -707,7 +722,11 @@ export default function HomePage() {
                     <Users className="w-3.5 h-3.5 text-slate-400" />
                     <b>
                       {calc.totalPax} Pax
-                      {calc.vipPax > 0 ? ` (${calc.vipPax} VIP)` : ''}
+                      {calc.wnaPax > 0
+                        ? ` (${calc.wniPax} WNI, ${calc.wnaPax} WNA)`
+                        : calc.vipPax > 0
+                        ? ` (${calc.vipPax} VIP)`
+                        : ''}
                     </b>
                   </span>
                   <span className="text-slate-300">•</span>

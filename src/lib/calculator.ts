@@ -165,6 +165,8 @@ export function createDefaultCalculatorState(
   return {
     tripName: 'Family Gathering PT. Maju Bersama',
     pax: defaultPax,
+    paxWni: defaultPax,
+    paxWna: 0,
     duration: defaultDays,
     distanceZone: 'medium',
     isForeigner: false,
@@ -271,7 +273,19 @@ export function calculateTrip(
   db: MasterDatabase,
   brand: BrandId
 ): CalculationResult {
-  const rawPax = Math.max(1, Number(state.pax) || 1);
+  const hasSplitPax =
+    state.paxWni !== undefined || state.paxWna !== undefined;
+  const rawWni = hasSplitPax
+    ? Math.max(0, Number(state.paxWni) || 0)
+    : state.isForeigner
+    ? 0
+    : Math.max(1, Number(state.pax) || 1);
+  const rawWna = hasSplitPax
+    ? Math.max(0, Number(state.paxWna) || 0)
+    : state.isForeigner
+    ? Math.max(1, Number(state.pax) || 1)
+    : 0;
+  const rawPax = Math.max(1, rawWni + rawWna);
   const days = Math.max(1, Math.min(7, Number(state.duration) || 1));
   const nights = Math.max(0, days - 1);
   const zone = state.distanceZone || 'medium';
@@ -295,6 +309,22 @@ export function calculateTrip(
       vipPax = Math.min(rawPax, rawVipPax);
       regularPax = Math.max(0, rawPax - vipPax);
       totalPax = rawPax;
+    }
+  }
+
+  // Hitung distribusi WNI & WNA yang selalu sinkron dengan totalPax (termasuk tambahan VIP)
+  let wniPax = rawWni;
+  let wnaPax = rawWna;
+  if (wniPax + wnaPax === 0) {
+    wniPax = 1;
+  }
+  const extraVipForTickets =
+    isVipActive && vipPaxMode === 'add_to_pax' ? vipPax : 0;
+  if (extraVipForTickets > 0) {
+    if (wniPax === 0 && wnaPax > 0) {
+      wnaPax += extraVipForTickets;
+    } else {
+      wniPax += extraVipForTickets;
     }
   }
 
@@ -584,22 +614,53 @@ export function calculateTrip(
       if (!destObj) continue;
       totalDestCount++;
 
-      const defaultHtm = getDestHtmForBrand(destObj, state.isForeigner, brand);
-      const key = `dest_D${d}_${destObj.id}`;
-      const { price: effHtm, isOverridden } = resolvePrice(key, defaultHtm);
+      const isMixedNationality = wniPax > 0 && wnaPax > 0;
 
-      rabItems.push({
-        key,
-        category: 'Destinasi & Jeep',
-        label: `Tiket Wisata (Hari ${d}): ${destObj.nama}`,
-        subLabel: destObj.wilayah,
-        volumeText: `${totalPax} Pax`,
-        multiplier: totalPax,
-        unitPrice: effHtm,
-        defaultUnitPrice: defaultHtm,
-        subtotal: totalPax * effHtm,
-        isOverridden,
-      });
+      if (wniPax > 0) {
+        const defaultHtmWni = getDestHtmForBrand(destObj, false, brand);
+        const keyWni = `dest_D${d}_${destObj.id}`;
+        const { price: effHtmWni, isOverridden: ovWni } = resolvePrice(
+          keyWni,
+          defaultHtmWni
+        );
+
+        rabItems.push({
+          key: keyWni,
+          category: 'Destinasi & Jeep',
+          label: `Tiket Wisata (Hari ${d}): ${destObj.nama}${
+            isMixedNationality ? ' — WNI' : ''
+          }`,
+          subLabel: `${destObj.wilayah} • Tarif Domestik (WNI)`,
+          volumeText: `${wniPax} Pax WNI`,
+          multiplier: wniPax,
+          unitPrice: effHtmWni,
+          defaultUnitPrice: defaultHtmWni,
+          subtotal: wniPax * effHtmWni,
+          isOverridden: ovWni,
+        });
+      }
+
+      if (wnaPax > 0) {
+        const defaultHtmWna = getDestHtmForBrand(destObj, true, brand);
+        const keyWna = `dest_wna_D${d}_${destObj.id}`;
+        const { price: effHtmWna, isOverridden: ovWna } = resolvePrice(
+          keyWna,
+          defaultHtmWna
+        );
+
+        rabItems.push({
+          key: keyWna,
+          category: 'Destinasi & Jeep',
+          label: `Tiket Wisata (Hari ${d}): ${destObj.nama} — WNA`,
+          subLabel: `${destObj.wilayah} • Tarif Mancanegara (WNA)`,
+          volumeText: `${wnaPax} Pax WNA`,
+          multiplier: wnaPax,
+          unitPrice: effHtmWna,
+          defaultUnitPrice: defaultHtmWna,
+          subtotal: wnaPax * effHtmWna,
+          isOverridden: ovWna,
+        });
+      }
 
       // Local guide per destination
       const destGuideDefault =
@@ -1121,6 +1182,8 @@ export function calculateTrip(
   return {
     regularPax,
     vipPax,
+    wniPax,
+    wnaPax,
     totalPax,
     days,
     nights,

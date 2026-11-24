@@ -122,6 +122,8 @@ export interface GalaDinnerItem {
 export interface CalculatorState {
   tripName: string;
   pax: number;
+  paxWni?: number; // Jumlah peserta Domestik (WNI)
+  paxWna?: number; // Jumlah peserta Mancanegara (WNA)
   duration: number; // 1 to 7
   distanceZone: DistanceZone;
   isForeigner: boolean;
@@ -248,6 +250,8 @@ export interface ManifestItem {
 export interface CalculationResult {
   regularPax: number;
   vipPax: number;
+  wniPax: number;
+  wnaPax: number;
   totalPax: number;
   days: number;
   nights: number;

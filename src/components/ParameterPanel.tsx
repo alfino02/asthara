@@ -83,23 +83,37 @@ export default function ParameterPanel({
 
   const days = Math.max(1, Math.min(7, state.duration));
   const nights = Math.max(0, days - 1);
+  const hasSplitPax =
+    state.paxWni !== undefined || state.paxWna !== undefined;
+  const paxWni = hasSplitPax
+    ? Math.max(0, Number(state.paxWni) || 0)
+    : state.isForeigner
+    ? 0
+    : Math.max(1, Number(state.pax) || 1);
+  const paxWna = hasSplitPax
+    ? Math.max(0, Number(state.paxWna) || 0)
+    : state.isForeigner
+    ? Math.max(1, Number(state.pax) || 1)
+    : 0;
+  const baseTotalPax = Math.max(1, paxWni + paxWna);
+
   const isVip = Boolean(state.incVip);
   const rawVip = isVip ? Math.max(0, state.vipPax || 0) : 0;
   const vipMode = state.vipPaxMode || 'add_to_pax';
   const effectiveTotalPax =
-    isVip && vipMode === 'add_to_pax' ? state.pax + rawVip : state.pax;
+    isVip && vipMode === 'add_to_pax' ? baseTotalPax + rawVip : baseTotalPax;
   const vipPax =
     isVip
       ? vipMode === 'add_to_pax'
         ? rawVip
-        : Math.min(state.pax, rawVip)
+        : Math.min(baseTotalPax, rawVip)
       : 0;
   const regularPax =
     isVip
       ? vipMode === 'add_to_pax'
-        ? state.pax
-        : Math.max(0, state.pax - vipPax)
-      : state.pax;
+        ? baseTotalPax
+        : Math.max(0, baseTotalPax - vipPax)
+      : baseTotalPax;
 
   const isExtrabed = Boolean(state.incExtrabed);
   const baseRoomCap = Math.max(1, Number(state.hotelRoomCapacity) || 2);
@@ -126,9 +140,11 @@ export default function ParameterPanel({
     onChange((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Handle Pax Change (and auto-adjust auto-mode armada days)
-  const handlePaxChange = (newPax: number) => {
-    const clampedPax = Math.max(1, Math.min(500, newPax || 1));
+  // Handle WNI & WNA Pax Split Change (and auto-adjust auto-mode armada days)
+  const handlePaxSplitChange = (nextWni: number, nextWna: number) => {
+    const cleanWni = Math.max(0, Math.min(500, Number.isNaN(nextWni) ? 0 : nextWni));
+    const cleanWna = Math.max(0, Math.min(500, Number.isNaN(nextWna) ? 0 : nextWna));
+    const clampedPax = Math.max(1, Math.min(500, cleanWni + cleanWna));
     const newRegPax =
       state.incVip && state.vipPaxMode === 'sub_allocation'
         ? Math.max(0, clampedPax - (state.vipPax || 0))
@@ -150,6 +166,9 @@ export default function ParameterPanel({
       return {
         ...prev,
         pax: clampedPax,
+        paxWni: cleanWni,
+        paxWna: cleanWna,
+        isForeigner: cleanWna > 0 && cleanWni === 0,
         armadaPlanByDay: nextArmada,
       };
     });
@@ -551,46 +570,76 @@ export default function ParameterPanel({
 
         {/* Row 2: 2-Column Spacious Ergonomic Metric Tiles (Peserta, Durasi, Zona, Margin) */}
         <div className="relative z-10 grid grid-cols-2 gap-2">
-          {/* Pax Input Tile */}
+          {/* Pax Input Tile (WNI & WNA) */}
           <div className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-xl p-2.5 flex flex-col justify-between min-h-[72px] transition">
             <div className="flex items-center justify-between text-[10px] font-bold text-slate-300 uppercase tracking-wider">
-              <span>Peserta</span>
-              <button
-                type="button"
-                onClick={() => updateField('isForeigner', !state.isForeigner)}
-                className={`px-1.5 py-0.2 rounded text-[10px] font-mono font-bold transition ${
-                  state.isForeigner
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                }`}
-                title="Klik untuk ganti WNI / WNA"
-              >
-                {state.isForeigner ? 'WNA' : 'WNI'}
-              </button>
-            </div>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <input
-                type="number"
-                min={1}
-                max={500}
-                value={state.pax}
-                onChange={(e) => handlePaxChange(parseInt(e.target.value, 10))}
-                className="w-full font-mono text-base font-black text-white bg-transparent focus:outline-none"
-              />
-              <span className="text-[11px] text-slate-400 font-semibold shrink-0">
-                {isVip && vipMode === 'add_to_pax' ? 'Reguler' : 'Pax'}
+              <span>Peserta (WNI / WNA)</span>
+              <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-200 font-mono text-[9.5px] font-bold">
+                {effectiveTotalPax} Pax
               </span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 mt-1">
+              {/* Input WNI */}
+              <div className="flex items-center justify-between gap-1 bg-slate-950/90 border border-slate-800 focus-within:border-emerald-500/70 rounded-lg px-2 py-1 transition">
+                <span className="text-[9.5px] font-black text-emerald-400 uppercase shrink-0">
+                  WNI
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  max={500}
+                  value={paxWni}
+                  onChange={(e) =>
+                    handlePaxSplitChange(
+                      parseInt(e.target.value, 10) || 0,
+                      paxWna
+                    )
+                  }
+                  aria-label="Jumlah Peserta WNI"
+                  className="w-full min-w-0 font-mono text-sm font-black text-white text-right bg-transparent focus:outline-none"
+                />
+              </div>
+
+              {/* Input WNA */}
+              <div className="flex items-center justify-between gap-1 bg-slate-950/90 border border-slate-800 focus-within:border-amber-500/70 rounded-lg px-2 py-1 transition">
+                <span className="text-[9.5px] font-black text-amber-400 uppercase shrink-0">
+                  WNA
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  max={500}
+                  value={paxWna}
+                  onChange={(e) =>
+                    handlePaxSplitChange(
+                      paxWni,
+                      parseInt(e.target.value, 10) || 0
+                    )
+                  }
+                  aria-label="Jumlah Peserta WNA"
+                  className="w-full min-w-0 font-mono text-sm font-black text-white text-right bg-transparent focus:outline-none"
+                />
+              </div>
             </div>
             {isVip ? (
               <div
-                className="text-[9px] text-amber-300 font-bold font-mono mt-0.5"
+                className="text-[9px] text-amber-300 font-bold font-mono mt-1"
                 title={`Total Beban: ${effectiveTotalPax} Pax (Termasuk ${vipPax} VIP)`}
               >
-                +{vipPax} VIP • Total {effectiveTotalPax} Pax
+                +{vipPax} VIP • {paxWni} WNI + {paxWna} WNA
               </div>
             ) : (
-              <div className="text-[9px] text-slate-500 font-medium">
-                Kapasitas rombongan
+              <div className="text-[9px] text-slate-400 font-medium mt-0.5 flex items-center justify-between">
+                <span>{paxWni} Domestik</span>
+                <span
+                  className={
+                    paxWna > 0
+                      ? 'text-amber-300 font-semibold'
+                      : 'text-slate-500'
+                  }
+                >
+                  {paxWna} Mancanegara
+                </span>
               </div>
             )}
           </div>
@@ -1439,7 +1488,8 @@ export default function ParameterPanel({
               {filteredDestinasi.map((dest) => {
                 const dayList = state.selectedDestByDay[safeDestDay] || [];
                 const isSelected = dayList.includes(dest.nama);
-                const htm = getDestHtmForBrand(dest, state.isForeigner, brand);
+                const htmWni = getDestHtmForBrand(dest, false, brand);
+                const htmWna = getDestHtmForBrand(dest, true, brand);
                 const guideFee = getDestGuideForBrand(dest, brand);
 
                 return (
@@ -1488,9 +1538,35 @@ export default function ParameterPanel({
                           </span>
                         </div>
                       </label>
-                      <span className="text-xs font-mono font-bold text-slate-900 shrink-0">
-                        {formatRupiah(htm)}
-                      </span>
+                      <div className="text-right shrink-0">
+                        {paxWni > 0 && paxWna > 0 ? (
+                          <div className="flex flex-col items-end leading-tight">
+                            <span className="text-[11px] font-mono font-bold text-slate-900">
+                              <span className="text-[9px] text-emerald-600 font-sans mr-1">
+                                WNI
+                              </span>
+                              {formatRupiah(htmWni)}
+                            </span>
+                            <span className="text-[10px] font-mono font-bold text-amber-700">
+                              <span className="text-[9px] text-amber-600 font-sans mr-1">
+                                WNA
+                              </span>
+                              {formatRupiah(htmWna)}
+                            </span>
+                          </div>
+                        ) : paxWna > 0 ? (
+                          <span className="text-xs font-mono font-bold text-amber-700">
+                            <span className="text-[9px] font-sans mr-1">
+                              WNA
+                            </span>
+                            {formatRupiah(htmWna)}
+                          </span>
+                        ) : (
+                          <span className="text-xs font-mono font-bold text-slate-900">
+                            {formatRupiah(htmWni)}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {isSelected && dest.wajibGuide && guideFee > 0 && (

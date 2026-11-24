@@ -54,11 +54,26 @@ export async function POST(request: Request) {
     const db = await fetchActiveMasterDatabase();
     const text = prompt.toLowerCase();
 
-    // 1. Parse Pax (jumlah peserta)
+    // 1. Parse Pax (jumlah peserta WNI & WNA)
     let pax = 28;
+    let paxWni = 28;
+    let paxWna = 0;
+    const wniMatch = text.match(/(\d+)\s*(?:wni|domestik|lokal)/i);
+    const wnaMatch = text.match(/(\d+)\s*(?:wna|asing|bule|mancanegara|foreigner)/i);
     const paxMatch = text.match(/(\d+)\s*(?:pax|orang|peserta|rombongan|p\b)/i);
-    if (paxMatch) {
+    if (wniMatch || wnaMatch) {
+      paxWni = wniMatch ? Math.max(0, Math.min(500, parseInt(wniMatch[1], 10))) : 0;
+      paxWna = wnaMatch ? Math.max(0, Math.min(500, parseInt(wnaMatch[1], 10))) : 0;
+      pax = Math.max(1, paxWni + paxWna);
+    } else if (paxMatch) {
       pax = Math.max(1, Math.min(500, parseInt(paxMatch[1], 10)));
+      if (text.includes('wna') || text.includes('asing') || text.includes('mancanegara')) {
+        paxWni = 0;
+        paxWna = pax;
+      } else {
+        paxWni = pax;
+        paxWna = 0;
+      }
     }
 
     // 2. Parse Duration (Hari & Malam)
@@ -254,6 +269,9 @@ export async function POST(request: Request) {
       config: {
         tripName: detectedName,
         pax,
+        paxWni,
+        paxWna,
+        isForeigner: paxWna > 0 && paxWni === 0,
         duration,
         incTransport: true,
         armadaPlanByDay,
