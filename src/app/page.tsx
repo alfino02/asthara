@@ -131,6 +131,31 @@ export default function HomePage() {
       const randCode = Math.floor(1000 + Math.random() * 9000);
       const quoteId = `QTC-${dateCode}-${randCode}`;
 
+      const savedSchedule = Array.from({ length: calc.days }, (_, idx) => {
+        const d = idx + 1;
+        const armPlan = state.armadaPlanByDay[d];
+        const armUnits =
+          state.incTransport && armPlan?.active
+            ? Object.entries(armPlan.selected || {})
+                .filter(([, u]) => Number(u) > 0)
+                .map(([k, u]) => `${u}× ${k}`)
+                .join(', ')
+            : 'Tanpa Armada';
+        return {
+          day: d,
+          armada: armUnits || 'Tanpa Armada',
+          dests: state.selectedDestByDay[d] || [],
+        };
+      });
+
+      const payloadSnapshot = {
+        ...state,
+        _savedManifest: calc.manifestItems,
+        _savedSchedule: savedSchedule,
+        _savedWniPax: calc.wniPax,
+        _savedWnaPax: calc.wnaPax,
+      };
+
       const record: QuotationRecord = {
         quoteId,
         brand: selectedBrand,
@@ -151,7 +176,7 @@ export default function HomePage() {
         totalNilai: calc.totalRevenue,
         estimasiLaba: calc.totalProfit,
         status: 'Disimpan',
-        payloadJson: JSON.stringify(state),
+        payloadJson: JSON.stringify(payloadSnapshot),
       };
 
       const res = await fetch('/api/quotations', {
@@ -178,7 +203,14 @@ export default function HomePage() {
   // Load Saved Quotation into Calculator
   const handleLoadQuotation = (q: QuotationRecord) => {
     try {
-      const parsed = JSON.parse(q.payloadJson || '{}');
+      const rawParsed = JSON.parse(q.payloadJson || '{}');
+      const {
+        _savedManifest: _m,
+        _savedSchedule: _s,
+        _savedWniPax: _wni,
+        _savedWnaPax: _wna,
+        ...parsed
+      } = rawParsed;
       const defaults = createDefaultCalculatorState(db, selectedBrand);
       const hasSplit = parsed.paxWni !== undefined || parsed.paxWna !== undefined;
       const loadedPax = Number(parsed.pax) || defaults.pax;

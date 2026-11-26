@@ -5,10 +5,15 @@ import {
   BrandId,
   CalculationResult,
   CalculatorState,
+  ManifestItem,
   MasterDatabase,
   QuotationRecord,
 } from '@/types/trip';
-import { formatRupiah } from '@/lib/calculator';
+import {
+  calculateTrip,
+  createDefaultCalculatorState,
+  formatRupiah,
+} from '@/lib/calculator';
 import ProposalPreview from './ProposalPreview';
 import MasterDatabaseView from './MasterDatabaseView';
 import {
@@ -26,6 +31,8 @@ import {
   Database,
   History,
   Printer,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 export type WorkspaceTab =
@@ -196,6 +203,118 @@ export default function ResultsWorkspace({
   onPrintPdf,
 }: ResultsWorkspaceProps) {
   const [historySearch, setHistorySearch] = useState<string>('');
+  const [expandedHistoryIds, setExpandedHistoryIds] = useState<
+    Record<string, boolean>
+  >({});
+
+  const toggleHistoryManifest = (quoteId: string) => {
+    setExpandedHistoryIds((prev) => ({
+      ...prev,
+      [quoteId]: !prev[quoteId],
+    }));
+  };
+
+  // Resolve full operational manifest & daily schedule for any saved quotation (supports both new snapshots & legacy archives)
+  const resolveQuotationManifest = (
+    q: QuotationRecord
+  ): {
+    manifestItems: ManifestItem[];
+    schedule: { day: number; armada: string; dests: string[] }[];
+    wniPax: number;
+    wnaPax: number;
+  } => {
+    try {
+      const parsed = JSON.parse(q.payloadJson || '{}');
+      const hasPayloadKeys =
+        parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0;
+
+      if (hasPayloadKeys) {
+        const defaults = createDefaultCalculatorState(db, q.brand || brand);
+        const mergedState: CalculatorState = {
+          ...defaults,
+          ...parsed,
+          armadaPlanByDay: parsed.armadaPlanByDay || defaults.armadaPlanByDay,
+          hotelPlanByNight: parsed.hotelPlanByNight || defaults.hotelPlanByNight,
+          mealPlanByDay: parsed.mealPlanByDay || defaults.mealPlanByDay,
+          snackPlanByDay: parsed.snackPlanByDay || defaults.snackPlanByDay,
+          selectedDestByDay:
+            parsed.selectedDestByDay || defaults.selectedDestByDay,
+          customPriceOverrides: parsed.customPriceOverrides || {},
+        };
+
+        const computed = calculateTrip(mergedState, db, q.brand || brand);
+        const manifestItems: ManifestItem[] = Array.isArray(
+          parsed._savedManifest
+        )
+          ? parsed._savedManifest
+          : computed.manifestItems;
+
+        const schedule: { day: number; armada: string; dests: string[] }[] =
+          Array.isArray(parsed._savedSchedule)
+            ? parsed._savedSchedule
+            : Array.from({ length: computed.days }, (_, idx) => {
+                const d = idx + 1;
+                const armPlan = mergedState.armadaPlanByDay[d];
+                const armUnits =
+                  mergedState.incTransport && armPlan?.active
+                    ? Object.entries(armPlan.selected || {})
+                        .filter(([, u]) => Number(u) > 0)
+                        .map(([k, u]) => `${u}× ${k}`)
+                        .join(', ')
+                    : 'Tanpa Armada';
+                return {
+                  day: d,
+                  armada: armUnits || 'Tanpa Armada',
+                  dests: mergedState.selectedDestByDay[d] || [],
+                };
+              });
+
+        return {
+          manifestItems,
+          schedule,
+          wniPax:
+            parsed._savedWniPax !== undefined
+              ? Number(parsed._savedWniPax)
+              : computed.wniPax,
+          wnaPax:
+            parsed._savedWnaPax !== undefined
+              ? Number(parsed._savedWnaPax)
+              : computed.wnaPax,
+        };
+      }
+    } catch {
+      // Fall through to summary fallback
+    }
+
+    // Fallback manifest if legacy quotation had empty payloadJson
+    return {
+      manifestItems: [
+        {
+          kategori: 'Armada Utama',
+          spesifikasi: q.armada || '-',
+          jumlahSatuan: 'Sesuai Paket',
+          keteranganLapangan: q.zona || 'Zona Operasional',
+          status: 'aktif',
+        },
+        {
+          kategori: 'Armada Jeep 4x4',
+          spesifikasi: q.jumlahJeep || 'Tidak Menggunakan Jeep',
+          jumlahSatuan:
+            q.jumlahJeep && !q.jumlahJeep.toLowerCase().includes('tidak')
+              ? 'Aktif'
+              : '0 Unit',
+          keteranganLapangan: 'Rekapitulasi arsip penawaran',
+          status:
+            q.jumlahJeep && !q.jumlahJeep.toLowerCase().includes('tidak')
+              ? 'aktif'
+              : 'nonaktif',
+        },
+      ],
+      schedule: [],
+      wniPax: q.pax,
+      wnaPax: 0,
+    };
+  };
 
   const isNabila = brand === 'nabila';
   const accentText = isNabila ? 'text-red-400' : 'text-orange-400';
@@ -703,8 +822,8 @@ export default function ResultsWorkspace({
                 Riwayat Penawaran Tersimpan — {brand.toUpperCase()}
               </h3>
               <p className="text-[11px] text-slate-400">
-                Klik &ldquo;Panggil&rdquo; untuk memuat ulang konfigurasi HPP ke
-                kalkulator
+                Klik &ldquo;Manifest&rdquo; untuk dropdown rincian kebutuhan
+                operasional atau &ldquo;Panggil&rdquo; untuk memuat ke kalkulator
               </p>
             </div>
 
@@ -722,78 +841,278 @@ export default function ResultsWorkspace({
               Belum ada riwayat penawaran yang sesuai filter.
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 pb-12">
               {filteredQuotations.map((q) => {
                 const isQNa = q.brand === 'nabila';
+                const isExpanded = Boolean(expandedHistoryIds[q.quoteId]);
+                const resolved = resolveQuotationManifest(q);
+                const activeManifestItems = resolved.manifestItems.filter(
+                  (m) => m.status !== 'nonaktif'
+                );
+                const inactiveManifestItems = resolved.manifestItems.filter(
+                  (m) => m.status === 'nonaktif'
+                );
+
                 return (
                   <div
                     key={q.quoteId}
-                    className="p-3.5 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 shadow-2xs transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    className={`rounded-2xl border bg-white shadow-2xs transition overflow-hidden ${
+                      isExpanded
+                        ? isQNa
+                          ? 'border-red-300 ring-1 ring-red-100'
+                          : 'border-orange-300 ring-1 ring-orange-100'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
                   >
-                    <div className="space-y-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-black text-slate-900">
-                          {q.quoteId}
-                        </span>
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
-                            isQNa
-                              ? 'bg-red-50 text-red-700 border border-red-200'
-                              : 'bg-orange-50 text-orange-700 border border-orange-200'
-                          }`}
-                        >
-                          {q.brand}
-                        </span>
-                        <span className="text-[11px] text-slate-400">
-                          {q.timestamp}
-                        </span>
-                      </div>
-                      <div className="text-sm font-black text-slate-900 truncate">
-                        {q.namaKlien}
-                      </div>
-                      <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2">
-                        <span>
-                          <b>{q.pax} Pax</b>
-                        </span>
-                        <span>•</span>
-                        <span>{q.durasi}</span>
-                        <span>•</span>
-                        <span>{q.armada}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
-                      <div className="text-left sm:text-right">
-                        <div className="text-[10px] text-slate-400 uppercase font-bold">
-                          Harga Jual / Pax
+                    {/* Main Card Row */}
+                    <div className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-xs font-black text-slate-900">
+                            {q.quoteId}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                              isQNa
+                                ? 'bg-red-50 text-red-700 border border-red-200'
+                                : 'bg-orange-50 text-orange-700 border border-orange-200'
+                            }`}
+                          >
+                            {q.brand}
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            {q.timestamp}
+                          </span>
                         </div>
-                        <div className="text-sm font-mono font-black text-slate-900">
-                          {formatRupiah(q.hargaJualPerPax)}
+                        <div className="text-sm font-black text-slate-900 truncate">
+                          {q.namaKlien}
                         </div>
-                        <div className="text-[11px] font-mono text-slate-500">
-                          Total HPP: {formatRupiah(q.hppTotal)}
+                        <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2">
+                          <span>
+                            <b>
+                              {q.pax} Pax
+                              {resolved.wnaPax > 0
+                                ? ` (${resolved.wniPax} WNI, ${resolved.wnaPax} WNA)`
+                                : ''}
+                            </b>
+                          </span>
+                          <span>•</span>
+                          <span>{q.durasi}</span>
+                          <span>•</span>
+                          <span>{q.armada}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => onLoadQuotation(q)}
-                          className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 transition shadow-xs"
-                        >
-                          <FolderOpen className="w-3.5 h-3.5" />
-                          <span>Panggil</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onDeleteQuotation(q.quoteId)}
-                          className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition"
-                          title="Hapus Penawaran"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+                        <div className="text-left sm:text-right">
+                          <div className="text-[10px] text-slate-400 uppercase font-bold">
+                            Harga Jual / Pax
+                          </div>
+                          <div className="text-sm font-mono font-black text-slate-900">
+                            {formatRupiah(q.hargaJualPerPax)}
+                          </div>
+                          <div className="text-[11px] font-mono text-slate-500">
+                            Total HPP: {formatRupiah(q.hppTotal)}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => toggleHistoryManifest(q.quoteId)}
+                            aria-expanded={isExpanded}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition shadow-2xs ${
+                              isExpanded
+                                ? isQNa
+                                  ? 'bg-red-600 text-white border-red-600'
+                                  : 'bg-orange-600 text-white border-orange-600'
+                                : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+                            }`}
+                            title="Lihat rincian Manifest Kebutuhan Operasional"
+                          >
+                            <PackageCheck className="w-3.5 h-3.5 shrink-0" />
+                            <span>Manifest ({activeManifestItems.length})</span>
+                            {isExpanded ? (
+                              <ChevronUp className="w-3.5 h-3.5 shrink-0" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => onLoadQuotation(q)}
+                            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white flex items-center gap-1.5 transition shadow-xs"
+                          >
+                            <FolderOpen className="w-3.5 h-3.5" />
+                            <span>Panggil</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDeleteQuotation(q.quoteId)}
+                            className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 border border-slate-200 transition"
+                            title="Hapus Penawaran"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Expandable Dropdown: Manifest Kebutuhan Operasional & Jadwal Harian */}
+                    {isExpanded && (
+                      <div className="border-t border-slate-200 bg-slate-50/80 p-3.5 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-6 h-6 rounded-lg flex items-center justify-center text-white ${
+                                isQNa ? 'bg-red-600' : 'bg-orange-600'
+                              }`}
+                            >
+                              <PackageCheck className="w-3.5 h-3.5" />
+                            </span>
+                            <div>
+                              <div className="text-xs font-black text-slate-900">
+                                Manifest Kebutuhan Operasional & Logistik
+                              </div>
+                              <div className="text-[10px] text-slate-500">
+                                {q.quoteId} • {q.zona} • Total Nilai:{' '}
+                                <b className="font-mono text-slate-700">
+                                  {formatRupiah(q.totalNilai)}
+                                </b>{' '}
+                                • Laba:{' '}
+                                <b className="font-mono text-emerald-700">
+                                  {formatRupiah(q.estimasiLaba)}
+                                </b>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold">
+                            <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700">
+                              {resolved.wniPax} WNI
+                              {resolved.wnaPax > 0
+                                ? ` + ${resolved.wnaPax} WNA`
+                                : ''}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-md bg-slate-900 text-white">
+                              {activeManifestItems.length} Item Aktif
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Manifest Table */}
+                        <div
+                          className="overflow-x-auto border border-slate-200/90 rounded-xl bg-white shadow-2xs"
+                          role="region"
+                          aria-label={`Manifest Kebutuhan ${q.quoteId}`}
+                          tabIndex={0}
+                        >
+                          <table className="w-full text-left border-collapse text-xs min-w-[520px]">
+                            <thead className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider">
+                              <tr>
+                                <th className="py-1.5 px-3">
+                                  Kebutuhan Operasional
+                                </th>
+                                <th className="py-1.5 px-3">
+                                  Spesifikasi / Alokasi
+                                </th>
+                                <th className="py-1.5 px-2.5 text-center">
+                                  Satuan
+                                </th>
+                                <th className="py-1.5 px-3">
+                                  Keterangan Lapangan
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {activeManifestItems.map((m, idx) => (
+                                <tr
+                                  key={idx}
+                                  className={
+                                    m.status === 'vip'
+                                      ? 'bg-amber-50/60 text-slate-900 font-semibold'
+                                      : idx % 2 === 1
+                                      ? 'bg-slate-50/50 text-slate-800'
+                                      : 'bg-white text-slate-800'
+                                  }
+                                >
+                                  <td className="py-1.5 px-3 font-bold text-xs whitespace-nowrap">
+                                    {m.kategori}
+                                  </td>
+                                  <td className="py-1.5 px-3 text-xs font-medium">
+                                    {m.spesifikasi}
+                                  </td>
+                                  <td className="py-1.5 px-2.5 text-center whitespace-nowrap">
+                                    <span
+                                      className={`inline-block px-2 py-0.5 rounded-md font-mono font-bold text-[10px] whitespace-nowrap ${
+                                        m.status === 'vip'
+                                          ? 'bg-amber-500 text-white'
+                                          : 'bg-slate-900 text-white'
+                                      }`}
+                                    >
+                                      {m.jumlahSatuan}
+                                    </span>
+                                  </td>
+                                  <td className="py-1.5 px-3 text-slate-500 text-[10px]">
+                                    {m.keteranganLapangan}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {inactiveManifestItems.length > 0 && (
+                          <div className="text-[10px] text-slate-400 flex flex-wrap items-center gap-1.5">
+                            <span className="font-bold uppercase tracking-wider text-slate-500">
+                              Tidak Digunakan:
+                            </span>
+                            {inactiveManifestItems.map((m, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 rounded bg-slate-200/70 text-slate-500 font-medium"
+                              >
+                                {m.kategori}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Compact Daily Route Schedule */}
+                        {resolved.schedule.length > 0 && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                            {resolved.schedule.map((sch) => (
+                              <div
+                                key={sch.day}
+                                className="p-2.5 rounded-xl border border-slate-200 bg-white text-[11px] space-y-1"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-black text-slate-900">
+                                    Hari {sch.day}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-mono text-[10px] font-bold text-slate-700 truncate">
+                                    {sch.armada}
+                                  </span>
+                                </div>
+                                <div className="text-[10.5px] text-slate-600">
+                                  <span className="text-slate-400">Rute: </span>
+                                  {sch.dests.length > 0 ? (
+                                    <span className="font-semibold text-slate-800">
+                                      {sch.dests.join(' → ')}
+                                    </span>
+                                  ) : (
+                                    <span className="italic text-slate-400">
+                                      Acara bebas / transfer
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
